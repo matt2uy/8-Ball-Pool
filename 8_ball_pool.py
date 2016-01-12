@@ -4,29 +4,28 @@
 # Description: Github repo: https://github.com/matt2uy/8-Ball-Pool
 # Lab requirements: ?
 
-import pygame
-import math
+import pygame, math
 # Got the colour values from http://www.colorpicker.com/
 # The variables below each colour initialization represent how...
 # ... colour's RGB values will change as the sun "sets"
 
 ### Game variables ###
-mouse_held = False   # if the mouse is currently holding the stick
+mouse_held = False   # if the mouse is currently holding the cue
 cue_end_x = 0
 cue_end_y = 0
 cue_buffer = 0
+balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
 
 # ball variable (will make objects/classes?
 cue_ball_x = 220
 cue_ball_y = 200
 cue_ball_direction = 0 # angle is represented in degrees
 cue_ball_speed = 0
-balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
 
 ### Game functions ###
 def angle_to_coordinates(angle, x, y):
     # get the x value by using the cosine function
-    x = 1 * math.cos(math.radians(angle)) # replace 22.6 with 'angle' and 13 with length
+    x = 1 * math.cos(math.radians(angle))
     # get the y value by using the sine function
     y = 1 * math.sin(math.radians(angle))
     return x, y
@@ -110,19 +109,18 @@ while not done:
     if balls_in_movement == False:
         # the first moment that the mouse is clicked
         if mouse_left == True and mouse_held == False:
-            print "c but not released yet"
             mouse_held = True
         # the duration of time WHILE the mouse is being clicked/held
         elif mouse_left == True and mouse_held == True:
-            # The amount the stick will move will depend on ...
+            # The amount the cue will move will depend on ...
             # ... the distance between the current mouse ...
             # ... position and the position it was at when clicked
             orig_mouse_x = mouse_x
             orig_mouse_y = mouse_y
             curr_mouse_x, curr_mouse_y = pygame.mouse.get_pos()
-            mouse_distance_travelled = math.sqrt((orig_mouse_x - curr_mouse_x)**2 + (orig_mouse_y - curr_mouse_y)**2)
+            mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, curr_mouse_x, curr_mouse_y)
 
-            # now move the stick backwards along the same angle
+            # now move the cue backwards along the same angle
             cue_buffer = mouse_distance_travelled
     
             # change the amount of power/ball speed it will transfer
@@ -133,7 +131,6 @@ while not done:
         # mouse is released AFTER being clicked at first (previous elif statement)
         elif mouse_left == False and mouse_held == True:
             cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
-            print "ball hit at", mouse_degs, "degrees"
             # set the cue ball variables and set the balls_in_movement variable in motion
             cue_ball_direction = mouse_degs
             balls_in_movement = True
@@ -146,7 +143,37 @@ while not done:
     # Balls are active        
     else: 
         # this means that the ball is not stationary at this frame
-        if cue_ball_speed > 0: 
+        if cue_ball_speed > 0:
+            # Check for collision:
+            def ball_to_cushion(ball_direction, ball_x, ball_y):
+                
+                # hit the top cushion
+                if ball_y < 72:
+                    if ball_direction > 270: # ball incoming from the left
+                        ball_direction = 360 - ball_direction
+                    else:                    # ball coming from the right
+                        ball_direction = 360 - ball_direction
+                        
+                # hit the bottom cushion
+                if ball_y > 330:
+                    if ball_direction < 90: # ball incoming from the left
+                        ball_direction = 360 - ball_direction
+                    else:                   # ball coming from the right                  ### problem with all sides -> the ball sometimes sticks at very low angles of reflection -> double bounces?
+                        ball_direction = 360 - ball_direction
+                # hit the left cushion
+                if ball_x < 72:
+                    if ball_direction > 180: # ball incoming from the bottom
+                        ball_direction += 90
+                    else:                   # ball coming from the top
+                        ball_direction -= 90
+                # hit the right cushion
+                if ball_x > 630:
+                    if ball_direction > 180: # ball incoming from the bottom
+                        ball_direction -= 90
+                    else:                   # ball coming from the top     
+                        ball_direction += 90
+                return ball_direction
+            cue_ball_direction = ball_to_cushion(cue_ball_direction, cue_ball_x, cue_ball_y)
             ### Move the ball in the correct direction based on cue_ball_direction
             cue_ball_x_increment, cue_ball_y_increment = angle_to_coordinates(cue_ball_direction, cue_ball_x, cue_ball_y)
             cue_ball_x += cue_ball_x_increment*cue_ball_speed
@@ -172,7 +199,7 @@ while not done:
     # Get cue end to ball length (AKA: length of the cue)
     mouse_to_ball_length = get_distance(cue_ball_x, cue_ball_y, cue_front_x, cue_front_y)
     
-    # limit the length of the stick
+    # limit the length of the cue
     cue_length = mouse_to_ball_length-200-cue_buffer
     ball_to_cue_distance = mouse_to_ball_length-20-cue_buffer
     
@@ -180,7 +207,7 @@ while not done:
     cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
     cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
 
-    # draw the stick when the balls aren't moving
+    # draw the cue when the balls aren't moving
     if balls_in_movement == False:
         pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
     
