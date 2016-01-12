@@ -1,85 +1,51 @@
-
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
-# Description: maybe put it on github? (on monday jan 11?)
+# Description: Github repo: https://github.com/matt2uy/8-Ball-Pool
 # Lab requirements: ?
 
 import pygame
 import math
-from math import acos, asin, atan2, degrees, pi, sqrt
 # Got the colour values from http://www.colorpicker.com/
 # The variables below each colour initialization represent how...
 # ... colour's RGB values will change as the sun "sets"
 
-
-
-##################################3
-         # TEMP
-
+### Game variables ###
 mouse_held = False   # if the mouse is currently holding the stick
 cue_end_x = 0
 cue_end_y = 0
 cue_buffer = 0
 
-##### will make an object for each ball
+# ball variable (will make objects/classes?
 cue_ball_x = 220
 cue_ball_y = 200
 cue_ball_direction = 0 # angle is represented in degrees
 cue_ball_speed = 0
 balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
 
-
-#######Functions: ##########
-# place imports at the top
+### Game functions ###
 def angle_to_coordinates(angle, x, y):
     # get the x value by using the cosine function
     x = 1 * math.cos(math.radians(angle)) # replace 22.6 with 'angle' and 13 with length
     # get the y value by using the sine function
     y = 1 * math.sin(math.radians(angle))
     return x, y
+
+def get_angle(object1_x, object1_y, object2_x, object2_y):        
+    difference_of_x = object1_x - object2_x
+    difference_of_y = object1_y - object2_y
+    radians = math.atan2(difference_of_y, difference_of_x)
+    radians %= 2*math.pi
+    angle = math.degrees(radians)
+    return angle
         
-############################3
-
-BROWN = (130, 84, 65) # house
-brown_r = 130
-brown_g = 84
-brown_b = 65
-
-BLUE = (68, 193, 242) # sky
-blue_r = 68
-blue_g = 193
-blue_b = 242
-
-GREEN = (51, 163, 47) # grass
-green_r = 51
-green_g = 163
-green_b = 47
-
-DARK_GREEN = (22, 110, 25) # grass
-dark_green_r = 22
-dark_green_g = 110
-dark_green_b = 25
-
-YELLOW = (242, 242, 68) # sun
-yellow_r = 242
-yellow_g = 242
-yellow_b = 68
-
-BLACK = (0, 0, 0) # roof
-black_r = 0
-black_g = 0
-black_b = 0
-
-WHITE = (255, 255, 255) # clouds
-white_r = 255
-white_b = 255
-white_g = 255
-
-GREY = (150, 150, 150) # moon
-
-### Position/speed/direction presets
-
+### Colours ###
+BROWN = (130, 84, 65) # cue
+GREEN = (51, 163, 47) # pool table surface
+RED = (222, 24, 24) # red balls
+BLUE = (24, 24, 222) # blue balls
+BLACK = (0, 0, 0) # background
+WHITE = (255, 255, 255) # cue ball
 
 pygame.init()
  
@@ -101,18 +67,11 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
- 
-    # --- Game logic should go here
- 
-    # --- Drawing code should go here
-
-    ######## Menu
-     
- 
+            
+    ### Drawing the playing area ###
     # Fill the background with a blue sky
     screen.fill(BLACK)
 
-    ### Draw the pool table
     # Draw the playing surface
     pygame.draw.rect(screen, GREEN, [50, 50, 600, 300], 0)
     # Draw the border/ledge?
@@ -127,9 +86,8 @@ while not done:
       
     # Draw the balls
     pygame.draw.circle(screen, WHITE, (int(cue_ball_x), int(cue_ball_y)), 8, 0)
-    pygame.draw.circle(screen, YELLOW, (525, 200), 8, 0)
-    pygame.draw.circle(screen, BLACK, (190, 90), 8, 0)
-
+    pygame.draw.circle(screen, RED, (525, 200), 8, 0)
+    pygame.draw.circle(screen, BLUE, (190, 90), 8, 0)
 
     # Get the mouse press values
     mouse_left = False
@@ -151,7 +109,7 @@ while not done:
             orig_mouse_x = mouse_x
             orig_mouse_y = mouse_y
             curr_mouse_x, curr_mouse_y = pygame.mouse.get_pos()
-            mouse_distance_travelled = sqrt((orig_mouse_x - curr_mouse_x)**2 + (orig_mouse_y - curr_mouse_y)**2)
+            mouse_distance_travelled = math.sqrt((orig_mouse_x - curr_mouse_x)**2 + (orig_mouse_y - curr_mouse_y)**2)
 
             # now move the stick backwards along the same angle
             cue_buffer = mouse_distance_travelled
@@ -189,23 +147,18 @@ while not done:
             balls_in_movement = False
 
             
-    ### Updating the cue's
+    ### Updating the cue's position and drawing it ###
     
     # Get the angle between the mouse and the cue ball
-    dx = cue_ball_x - mouse_x
-    dy = cue_ball_y - mouse_y
-    rads = atan2(dy,dx)
-    rads %= 2*pi
-    mouse_degs = degrees(rads)
+    mouse_degs = get_angle(cue_ball_x, cue_ball_y, mouse_x, mouse_y)
     
     cue_front_x = mouse_x
     cue_back_x = mouse_x
     cue_front_y = mouse_y
     cue_back_y = mouse_y
 
-    
     # Get cue end to ball length (AKA: length of the cue)
-    mouse_to_ball_length = sqrt((cue_ball_x - cue_front_x)**2 + (cue_ball_y - cue_front_y)**2)
+    mouse_to_ball_length = math.sqrt((cue_ball_x - cue_front_x)**2 + (cue_ball_y - cue_front_y)**2)
     
     # limit the length of the stick
     cue_length = mouse_to_ball_length-200-cue_buffer
@@ -225,8 +178,6 @@ while not done:
     # draw the stick when the balls aren't moving
     if balls_in_movement == False:
         pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
-
-    
     
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
