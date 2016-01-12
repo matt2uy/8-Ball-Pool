@@ -38,7 +38,18 @@ def get_angle(object1_x, object1_y, object2_x, object2_y):
     radians %= 2*math.pi
     angle = math.degrees(radians)
     return angle
-        
+
+# Get the distance between two points
+def get_distance(point1_x, point1_y, point2_x, point2_y):
+    distance = math.sqrt((point1_x - point2_x)**2 + (point1_y - point2_y)**2)
+    return distance
+
+def convert_polar_coordinates_to_cartesian(x, y, angle, length):
+    # use the cos and sin functions to convert: shown here - https://www.mathsisfun.com/polar-cartesian-coordinates.html
+    x += length * math.cos(math.radians(angle))
+    y += length * math.sin(math.radians(angle))
+    return x, y
+
 ### Colours ###
 BROWN = (130, 84, 65) # cue
 GREEN = (51, 163, 47) # pool table surface
@@ -131,8 +142,9 @@ while not done:
         elif mouse_left == False: 
             # keep updating cue position
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            
-    else: # cue has hit the ball and the balls are moving
+
+    # Balls are active        
+    else: 
         # this means that the ball is not stationary at this frame
         if cue_ball_speed > 0: 
             ### Move the ball in the correct direction based on cue_ball_direction
@@ -158,23 +170,16 @@ while not done:
     cue_back_y = mouse_y
 
     # Get cue end to ball length (AKA: length of the cue)
-    mouse_to_ball_length = math.sqrt((cue_ball_x - cue_front_x)**2 + (cue_ball_y - cue_front_y)**2)
+    mouse_to_ball_length = get_distance(cue_ball_x, cue_ball_y, cue_front_x, cue_front_y)
     
     # limit the length of the stick
     cue_length = mouse_to_ball_length-200-cue_buffer
-    cue_front_x += cue_length * math.cos(math.radians(mouse_degs))
-    # get the y value by using the sine function
-    cue_front_y += cue_length * math.sin(math.radians(mouse_degs))
-
-    # back end of the stick
     ball_to_cue_distance = mouse_to_ball_length-20-cue_buffer
-    cue_back_x += ball_to_cue_distance * math.cos(math.radians(mouse_degs))
-    # get the y value by using the sine function
-    cue_back_y += ball_to_cue_distance * math.sin(math.radians(mouse_degs))
+    
+    # get two pairs of the cue's coordinates from their polar coordinates (mouse angle + distance from the cue ball)
+    cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
+    cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
 
-
-    # Draw the mouse pointer
-    pygame.draw.rect(screen, BLACK, (mouse_x-5, mouse_y-5, 10, 10), 0)
     # draw the stick when the balls aren't moving
     if balls_in_movement == False:
         pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
@@ -183,7 +188,7 @@ while not done:
     pygame.display.flip()
  
     # --- Limit to 60 frames per second
-    clock.tick(30)
+    clock.tick(60)
  
 # Close the window and quit.
 # If you forget this line, the program will 'hang'
