@@ -184,7 +184,8 @@ while not done:
             mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, mouse_x, mouse_y)
 
             # now move the cue backwards along the same angle
-            cue_buffer = mouse_distance_travelled
+            if mouse_distance_travelled < 100:
+                cue_buffer = mouse_distance_travelled
     
             # change the amount of power/ball speed it will transfer
             # ... depending of the distance between the cue and the cue ball
@@ -215,18 +216,20 @@ while not done:
             cue_ball_pocketed = check_if_ball_pocketed(cue_ball_x, cue_ball_y)
 
             if cue_ball_x > 500 :#== red_ball_x and cue_ball_y == red_ball_y:
-                red_ball_direction = 0
+                red_ball_direction = 45
                 red_ball_speed = 5
 
         if red_ball_speed > 0:
+            # Alter the ball's path if there is a collision
+            red_ball_direction = ball_to_cushion(red_ball_direction, red_ball_x, red_ball_y)
             red_ball_x += red_ball_speed
             '''# Alter the ball's path if there is a collision
             red_ball_direction = ball_to_cushion(red_ball_direction, red_ball_x, red_ball_y)
             ### Move the ball in the correct direction based on red_ball_direction
             red_ball_x_increment, red_ball_y_increment = angle_to_coordinates(red_ball_direction, red_ball_x, red_ball_y)
             red_ball_x += red_ball_x_increment*red_ball_speed
-            red_ball_y += red_ball_y_increment*red_ball_speed
-            # gradually reduce the ball's speed due to gravity'''
+            red_ball_y += red_ball_y_increment*red_ball_speed'''
+            # gradually reduce the ball's speed due to gravity
             red_ball_speed -= 1
             
         # all balls have stopped moving
