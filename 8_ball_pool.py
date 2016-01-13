@@ -22,6 +22,34 @@ cue_ball_y = 200
 cue_ball_direction = 0 # angle is represented in degrees
 cue_ball_speed = 0
 
+
+### Drawing Functions ###
+def draw_static_objects():
+    # Draw the playing surface
+    pygame.draw.rect(screen, GREEN, [50, 50, 600, 300], 0)
+    # Draw the border/ledge?
+    pygame.draw.rect(screen, BROWN, [50, 50, 600, 300], 20)
+    # Draw the pockets
+    pygame.draw.circle(screen, BLACK, (60, 60), 12, 0)
+    pygame.draw.circle(screen, BLACK, (350, 60), 12, 0)
+    pygame.draw.circle(screen, BLACK, (640, 60), 12, 0)
+    pygame.draw.circle(screen, BLACK, (60, 340), 12, 0)
+    pygame.draw.circle(screen, BLACK, (350, 340), 12, 0)
+    pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)
+
+def draw_balls():
+    pygame.draw.circle(screen, WHITE, (int(cue_ball_x), int(cue_ball_y)), 8, 0)
+    pygame.draw.circle(screen, RED, (525, 200), 8, 0)
+    pygame.draw.circle(screen, BLUE, (190, 90), 8, 0)
+
+### User input functions ###
+def get_mouse_press():
+    mouse_left = False
+    mouse_middle = False
+    mouse_right = False
+    mouse_left, mouse_middle, mouse_right = pygame.mouse.get_pressed()
+    return mouse_left
+        
 ### Game functions ###
 def angle_to_coordinates(angle, x, y):
     # get the x value by using the cosine function
@@ -49,6 +77,34 @@ def convert_polar_coordinates_to_cartesian(x, y, angle, length):
     y += length * math.sin(math.radians(angle))
     return x, y
 
+def ball_to_cushion(ball_direction, ball_x, ball_y):                
+    # hit the top cushion
+    if ball_y < 72:
+        if ball_direction > 270: # ball incoming from the left
+            ball_direction = 360 - ball_direction
+        else:                    # ball coming from the right
+            ball_direction = 360 - ball_direction
+            
+    # hit the bottom cushion
+    if ball_y > 330:
+        if ball_direction < 90: # ball incoming from the left
+            ball_direction = 360 - ball_direction
+        else:                   # ball coming from the right                  ### problem with all sides -> the ball sometimes sticks at very low angles of reflection -> double bounces?
+            ball_direction = 360 - ball_direction
+    # hit the left cushion
+    if ball_x < 72:
+        if ball_direction > 180: # ball incoming from the bottom
+            ball_direction += 90
+        else:                   # ball coming from the top
+            ball_direction -= 90
+    # hit the right cushion
+    if ball_x > 630:
+        if ball_direction > 180: # ball incoming from the bottom
+            ball_direction -= 90
+        else:                   # ball coming from the top     
+            ball_direction += 90
+    return ball_direction
+
 ### Colours ###
 BROWN = (130, 84, 65) # cue
 GREEN = (51, 163, 47) # pool table surface
@@ -63,7 +119,7 @@ pygame.init()
 size = (700, 400)
 screen = pygame.display.set_mode(size)
  
-pygame.display.set_caption("My Game")
+pygame.display.set_caption("8 Ball Pool")
  
 # Loop until the user clicks the close button.
 done = False
@@ -79,31 +135,12 @@ while not done:
             done = True
             
     ### Drawing the playing area ###
-    # Fill the background with a blue sky
-    screen.fill(BLACK)
-
-    # Draw the playing surface
-    pygame.draw.rect(screen, GREEN, [50, 50, 600, 300], 0)
-    # Draw the border/ledge?
-    pygame.draw.rect(screen, BROWN, [50, 50, 600, 300], 20)
-    # Draw the pockets
-    pygame.draw.circle(screen, BLACK, (60, 60), 12, 0)
-    pygame.draw.circle(screen, BLACK, (350, 60), 12, 0)
-    pygame.draw.circle(screen, BLACK, (640, 60), 12, 0)
-    pygame.draw.circle(screen, BLACK, (60, 340), 12, 0)
-    pygame.draw.circle(screen, BLACK, (350, 340), 12, 0)
-    pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)
-      
-    # Draw the balls
-    pygame.draw.circle(screen, WHITE, (int(cue_ball_x), int(cue_ball_y)), 8, 0)
-    pygame.draw.circle(screen, RED, (525, 200), 8, 0)
-    pygame.draw.circle(screen, BLUE, (190, 90), 8, 0)
+    screen.fill(BLACK) # background
+    draw_static_objects()
+    draw_balls()
 
     # Get the mouse press values
-    mouse_left = False
-    mouse_middle = False
-    mouse_right = False
-    mouse_left, mouse_middle, mouse_right = pygame.mouse.get_pressed()
+    mouse_left = get_mouse_press()
     
     # Update the cue's position + check whether the cue has hit the ball
     if balls_in_movement == False:
@@ -127,7 +164,6 @@ while not done:
             # ... depending of the distance between the cue and the cue ball
             cue_ball_speed = mouse_distance_travelled/10
             
-
         # mouse is released AFTER being clicked at first (previous elif statement)
         elif mouse_left == False and mouse_held == True:
             cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
@@ -144,35 +180,7 @@ while not done:
     else: 
         # this means that the ball is not stationary at this frame
         if cue_ball_speed > 0:
-            # Check for collision:
-            def ball_to_cushion(ball_direction, ball_x, ball_y):
-                
-                # hit the top cushion
-                if ball_y < 72:
-                    if ball_direction > 270: # ball incoming from the left
-                        ball_direction = 360 - ball_direction
-                    else:                    # ball coming from the right
-                        ball_direction = 360 - ball_direction
-                        
-                # hit the bottom cushion
-                if ball_y > 330:
-                    if ball_direction < 90: # ball incoming from the left
-                        ball_direction = 360 - ball_direction
-                    else:                   # ball coming from the right                  ### problem with all sides -> the ball sometimes sticks at very low angles of reflection -> double bounces?
-                        ball_direction = 360 - ball_direction
-                # hit the left cushion
-                if ball_x < 72:
-                    if ball_direction > 180: # ball incoming from the bottom
-                        ball_direction += 90
-                    else:                   # ball coming from the top
-                        ball_direction -= 90
-                # hit the right cushion
-                if ball_x > 630:
-                    if ball_direction > 180: # ball incoming from the bottom
-                        ball_direction -= 90
-                    else:                   # ball coming from the top     
-                        ball_direction += 90
-                return ball_direction
+            # Alter the ball's path if there is a collision
             cue_ball_direction = ball_to_cushion(cue_ball_direction, cue_ball_x, cue_ball_y)
             ### Move the ball in the correct direction based on cue_ball_direction
             cue_ball_x_increment, cue_ball_y_increment = angle_to_coordinates(cue_ball_direction, cue_ball_x, cue_ball_y)
