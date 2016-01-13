@@ -16,19 +16,23 @@ cue_end_y = 0
 cue_buffer = 0
 balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
 
-# ball variables (will make objects/classes?
-cue_ball_x = 220
-cue_ball_y = 200
-cue_ball_direction = 0 # angle is represented in degrees
-cue_ball_speed = 0
-cue_ball_pocketed = False
+# Defining the ball class
+class Ball():
+    def __init__(self):
+        self.x = 220
+        self.y = 200
+        self.direction = 0 # angle is represented in degrees
+        self.speed = 0
+        self.pocketed = False
+        
+# create an instance of each ball on the table
+cue_ball = Ball()
+cue_ball.x = 220
+cue_ball.y = 200
 
-red_ball_x = 525
-red_ball_y = 200
-red_ball_direction = 0 # angle is represented in degrees
-red_ball_speed = 0
-red_ball_pocketed = False
-
+red_ball = Ball()
+red_ball.x = 525
+red_ball.y = 200
 
 ### Drawing Functions ###
 def draw_static_objects():
@@ -45,10 +49,10 @@ def draw_static_objects():
     pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)
 
 def draw_balls():
-    if cue_ball_pocketed == False:
-        pygame.draw.circle(screen, WHITE, (int(cue_ball_x), int(cue_ball_y)), 8, 0)
-    if red_ball_pocketed == False:
-        pygame.draw.circle(screen, RED, (red_ball_x, red_ball_y), 8, 0)
+    if cue_ball.pocketed == False:
+        pygame.draw.circle(screen, WHITE, (int(cue_ball.x), int(cue_ball.y)), 8, 0)
+    if red_ball.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball.x), int(red_ball.y)), 8, 0)
     # no pocketed variable yet
     pygame.draw.circle(screen, BLUE, (190, 90), 8, 0)
 
@@ -182,64 +186,62 @@ while not done:
             # ... position and the position it was at when clicked
             
             mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, mouse_x, mouse_y)
+            if mouse_distance_travelled > 100: # limit the distance that the cue can be pulled back
+                mouse_distance_travelled = 100
 
             # now move the cue backwards along the same angle
-            if mouse_distance_travelled < 100:
-                cue_buffer = mouse_distance_travelled
+            cue_buffer = mouse_distance_travelled
     
             # change the amount of power/ball speed it will transfer
             # ... depending of the distance between the cue and the cue ball
-            cue_ball_speed = mouse_distance_travelled/10
+            cue_ball.speed = mouse_distance_travelled/7
             
         # mouse is released AFTER being clicked at first (previous elif statement)
         elif mouse_left == False and mouse_held == True:
             cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
             # set the cue ball variables and set the balls_in_movement variable in motion
-            cue_ball_direction = mouse_degs
+            cue_ball.direction = mouse_degs
             balls_in_movement = True
             mouse_held = False 
 
     # Balls are active        
     else: 
         # this means that the ball is not stationary at this frame
-        if cue_ball_speed > 0:
+        if cue_ball.speed > 0:
             # Alter the ball's path if there is a collision
-            cue_ball_direction = ball_to_cushion(cue_ball_direction, cue_ball_x, cue_ball_y)
+            cue_ball.direction = ball_to_cushion(cue_ball.direction, cue_ball.x, cue_ball.y)
             ### Move the ball in the correct direction based on cue_ball_direction
-            cue_ball_x_increment, cue_ball_y_increment = angle_to_coordinates(cue_ball_direction, cue_ball_x, cue_ball_y)
-            cue_ball_x += cue_ball_x_increment*cue_ball_speed
-            cue_ball_y += cue_ball_y_increment*cue_ball_speed
+            cue_ball_x_increment, cue_ball_y_increment = angle_to_coordinates(cue_ball.direction, cue_ball.x, cue_ball.y)
+            cue_ball.x += cue_ball_x_increment*cue_ball.speed
+            cue_ball.y += cue_ball_y_increment*cue_ball.speed
             # gradually reduce the ball's speed due to gravity
-            cue_ball_speed -= 0.25
+            cue_ball.speed -= 0.1
 
             ## Check if it gets pocketed
-            cue_ball_pocketed = check_if_ball_pocketed(cue_ball_x, cue_ball_y)
+            cue_ball.pocketed = check_if_ball_pocketed(cue_ball.x, cue_ball.y)
 
-            if cue_ball_x > 500 :#== red_ball_x and cue_ball_y == red_ball_y:
-                red_ball_direction = 45
-                red_ball_speed = 5
+            if cue_ball.x > 500 :#== red_ball_x and cue_ball_y == red_ball_y:
+                red_ball.direction = 45
+                red_ball.speed = 5
 
-        if red_ball_speed > 0:
+        if red_ball.speed > 0:
             # Alter the ball's path if there is a collision
-            red_ball_direction = ball_to_cushion(red_ball_direction, red_ball_x, red_ball_y)
-            red_ball_x += red_ball_speed
-            '''# Alter the ball's path if there is a collision
-            red_ball_direction = ball_to_cushion(red_ball_direction, red_ball_x, red_ball_y)
-            ### Move the ball in the correct direction based on red_ball_direction
+            red_ball.direction = ball_to_cushion(red_ball.direction, red_ball.x, red_ball.y)
+            '''### Move the ball in the correct direction based on red_ball_direction
             red_ball_x_increment, red_ball_y_increment = angle_to_coordinates(red_ball_direction, red_ball_x, red_ball_y)
             red_ball_x += red_ball_x_increment*red_ball_speed
             red_ball_y += red_ball_y_increment*red_ball_speed'''
             # gradually reduce the ball's speed due to gravity
-            red_ball_speed -= 1
+            red_ball.speed -= 1
             
         # all balls have stopped moving
-        if cue_ball_speed <= 0 and red_ball_speed <= 0:
+        if cue_ball.speed <= 0 and red_ball.speed <= 0:
             balls_in_movement = False
             
     ### Updating the cue's position and drawing it ###
     
     # Get the angle between the mouse and the cue ball
-    mouse_degs = get_angle(cue_ball_x, cue_ball_y, mouse_x, mouse_y)
+    mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
     
     cue_front_x = mouse_x
     cue_back_x = mouse_x
@@ -247,7 +249,7 @@ while not done:
     cue_back_y = mouse_y
 
     # Get cue end to ball length (AKA: length of the cue)
-    mouse_to_ball_length = get_distance(cue_ball_x, cue_ball_y, cue_front_x, cue_front_y)
+    mouse_to_ball_length = get_distance(cue_ball.x, cue_ball.y, cue_front_x, cue_front_y)
     
     # limit the length of the cue
     cue_length = mouse_to_ball_length-200-cue_buffer
