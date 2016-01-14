@@ -132,6 +132,20 @@ def check_if_ball_pocketed(ball_x, ball_y):
     # check for bottom middle pocket
     # check for bottom left pocket'''
 
+def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed):
+    # Alter the ball's path if there is a collision
+    ball_direction = ball_to_cushion(ball_direction, ball_x, ball_y)
+    ### Move the ball in the correct direction based on cue_ball_direction
+    ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
+    ball_x += ball_x_increment*ball_speed
+    ball_y += ball_y_increment*ball_speed
+    # gradually reduce the ball's speed due to gravity
+    ball_speed -= 0.1
+
+    ## Check if it gets pocketed
+    ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
+    return ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
+
 ### Colours ###
 BROWN = (130, 84, 65) # cue
 GREEN = (51, 163, 47) # pool table surface
@@ -208,17 +222,8 @@ while not done:
     else: 
         # this means that the ball is not stationary at this frame
         if cue_ball.speed > 0:
-            # Alter the ball's path if there is a collision
-            cue_ball.direction = ball_to_cushion(cue_ball.direction, cue_ball.x, cue_ball.y)
-            ### Move the ball in the correct direction based on cue_ball_direction
-            cue_ball_x_increment, cue_ball_y_increment = angle_to_coordinates(cue_ball.direction, cue_ball.x, cue_ball.y)
-            cue_ball.x += cue_ball_x_increment*cue_ball.speed
-            cue_ball.y += cue_ball_y_increment*cue_ball.speed
-            # gradually reduce the ball's speed due to gravity
-            cue_ball.speed -= 0.1
-
-            ## Check if it gets pocketed
-            cue_ball.pocketed = check_if_ball_pocketed(cue_ball.x, cue_ball.y)
+            # update the ball's location and status
+            cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed = manage_ball_status(cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed)
 
             if cue_ball.x > 500 :#== red_ball_x and cue_ball_y == red_ball_y:
                 red_ball.direction = 45
@@ -239,7 +244,6 @@ while not done:
             balls_in_movement = False
             
     ### Updating the cue's position and drawing it ###
-    
     # Get the angle between the mouse and the cue ball
     mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
     
