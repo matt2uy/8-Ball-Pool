@@ -1,3 +1,4 @@
+# To do: git commit -m"Added all balls in their correct starting positions"..."Ball to ball collisions"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
@@ -27,12 +28,72 @@ class Ball():
         
 # create an instance of each ball on the table
 cue_ball = Ball()
-cue_ball.x = 220
+cue_ball.x = 205 # exactly on the left third
 cue_ball.y = 200
 
-red_ball = Ball()
-red_ball.x = 525
-red_ball.y = 200
+eight_ball = Ball() # third column, second row
+eight_ball.x = 495 # exactly on the right third x-value
+eight_ball.y = 200
+
+# player one's balls (red)     # maybe make a function to make initializing the 16 balls a bit shorter
+red_ball_1 = Ball() # first column, first row
+red_ball_1.x = 467 
+red_ball_1.y = 200 
+
+red_ball_2 = Ball() # second column, first row
+red_ball_2.x = 481
+red_ball_2.y = 193
+
+red_ball_3 = Ball() # third column, third row
+red_ball_3.x = 495
+red_ball_3.y = 214
+
+red_ball_4 = Ball() # fourth column, first row
+red_ball_4.x = 509
+red_ball_4.y = 178
+
+red_ball_5 = Ball() # fourth column, third row
+red_ball_5.x = 509
+red_ball_5.y = 206
+
+red_ball_6 = Ball() # fifth column, first row
+red_ball_6.x = 523
+red_ball_6.y = 171
+
+red_ball_7 = Ball() # fifth column, third row
+red_ball_7.x = 523
+red_ball_7.y = 199
+
+# player two's balls (blue)
+blue_ball_1 = Ball() # second column, second row
+blue_ball_1.x = 481
+blue_ball_1.y = 207
+
+blue_ball_2 = Ball()
+blue_ball_2.x = 495  # third column, first row
+blue_ball_2.y = 186
+
+blue_ball_3 = Ball() # fourth column, second row
+blue_ball_3.x = 509
+blue_ball_3.y = 192
+
+blue_ball_4 = Ball() # fourth column, fourth row
+blue_ball_4.x = 509
+blue_ball_4.y = 220
+
+blue_ball_5 = Ball() # fifth column, second row
+blue_ball_5.x = 523
+blue_ball_5.y = 185
+
+blue_ball_6 = Ball() # fifth column, fourth row
+blue_ball_6.x = 523
+blue_ball_6.y = 213
+
+blue_ball_7 = Ball() # fifth column, fifth row
+blue_ball_7.x = 523
+blue_ball_7.y = 227
+
+
 
 ### Drawing Functions ###
 def draw_static_objects():
@@ -41,20 +102,50 @@ def draw_static_objects():
     # Draw the border/ledge?
     pygame.draw.rect(screen, BROWN, [50, 50, 600, 300], 20)
     # Draw the pockets
-    pygame.draw.circle(screen, BLACK, (60, 60), 12, 0)
-    pygame.draw.circle(screen, BLACK, (350, 60), 12, 0)
-    pygame.draw.circle(screen, BLACK, (640, 60), 12, 0)
-    pygame.draw.circle(screen, BLACK, (60, 340), 12, 0)
-    pygame.draw.circle(screen, BLACK, (350, 340), 12, 0)
-    pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)
+    pygame.draw.circle(screen, BLACK, (60, 60), 12, 0)      # top left
+    pygame.draw.circle(screen, BLACK, (350, 60), 12, 0)     # top middle
+    pygame.draw.circle(screen, BLACK, (640, 60), 12, 0)     # top right
+    pygame.draw.circle(screen, BLACK, (60, 340), 12, 0)     # bottom left
+    pygame.draw.circle(screen, BLACK, (350, 340), 12, 0)    # bottom middle
+    pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)    # bottom right
 
 def draw_balls():
+    # draw the cue and eight balls
     if cue_ball.pocketed == False:
-        pygame.draw.circle(screen, WHITE, (int(cue_ball.x), int(cue_ball.y)), 8, 0)
-    if red_ball.pocketed == False:
-        pygame.draw.circle(screen, RED, (int(red_ball.x), int(red_ball.y)), 8, 0)
-    # no pocketed variable yet
-    pygame.draw.circle(screen, BLUE, (190, 90), 8, 0)
+        pygame.draw.circle(screen, WHITE, (int(cue_ball.x), int(cue_ball.y)), 7, 0)
+    if eight_ball.pocketed == False:
+        pygame.draw.circle(screen, BLACK, (int(eight_ball.x), int(eight_ball.y)), 7, 0)
+    # draw the red (player one) balls
+    if red_ball_1.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_1.x), int(red_ball_1.y)), 7, 0)
+    if red_ball_2.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_2.x), int(red_ball_2.y)), 7, 0)
+    if red_ball_3.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_3.x), int(red_ball_3.y)), 7, 0)
+    if red_ball_4.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_4.x), int(red_ball_4.y)), 7, 0)
+    if red_ball_5.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_5.x), int(red_ball_5.y)), 7, 0)
+    if red_ball_6.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_6.x), int(red_ball_6.y)), 7, 0)
+    if red_ball_7.pocketed == False:
+        pygame.draw.circle(screen, RED, (int(red_ball_7.x), int(red_ball_7.y)), 7, 0)
+        
+    # draw the blue (player two) balls
+    if blue_ball_1.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_1.x), int(blue_ball_1.y)), 7, 0)
+    if blue_ball_2.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_2.x), int(blue_ball_2.y)), 7, 0)
+    if blue_ball_3.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_3.x), int(blue_ball_3.y)), 7, 0)
+    if blue_ball_4.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_4.x), int(blue_ball_4.y)), 7, 0)
+    if blue_ball_5.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_5.x), int(blue_ball_5.y)), 7, 0)
+    if blue_ball_6.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_6.x), int(blue_ball_6.y)), 7, 0)
+    if blue_ball_7.pocketed == False:
+        pygame.draw.circle(screen, BLUE, (int(blue_ball_7.x), int(blue_ball_7.y)), 7, 0)
 
 ### User input functions ###
 def get_mouse_press():
@@ -225,22 +316,22 @@ while not done:
             # update the ball's location and status
             cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed = manage_ball_status(cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed)
 
-            if cue_ball.x > 500 :#== red_ball_x and cue_ball_y == red_ball_y:
-                red_ball.direction = 45
-                red_ball.speed = 5
+            if cue_ball.x > 500 :#== red_ball_1.x and cue_ball_y == red_ball_1.y:
+                red_ball_1.direction = 45
+                red_ball_1.speed = 5
 
-        if red_ball.speed > 0:
+        if red_ball_1.speed > 0:
             # Alter the ball's path if there is a collision
-            red_ball.direction = ball_to_cushion(red_ball.direction, red_ball.x, red_ball.y)
+            red_ball_1.direction = ball_to_cushion(red_ball_1.direction, red_ball_1.x, red_ball_1.y)
             '''### Move the ball in the correct direction based on red_ball_direction
             red_ball_x_increment, red_ball_y_increment = angle_to_coordinates(red_ball_direction, red_ball_x, red_ball_y)
             red_ball_x += red_ball_x_increment*red_ball_speed
             red_ball_y += red_ball_y_increment*red_ball_speed'''
             # gradually reduce the ball's speed due to gravity
-            red_ball.speed -= 1
+            red_ball_1.speed -= 1
             
         # all balls have stopped moving
-        if cue_ball.speed <= 0 and red_ball.speed <= 0:
+        if cue_ball.speed <= 0 and red_ball_1.speed <= 0:
             balls_in_movement = False
             
     ### Updating the cue's position and drawing it ###
