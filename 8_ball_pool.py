@@ -242,6 +242,24 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
     # check for a ball to ball collision
     #ball_direction = ball_to_ball_collision() # in the function -> if balls are touching and at least one is moving -> transfer 50% of first ball's speed? and subtract the first ball's speed by 50%? ... in terms of angle/direction, get the angle created between both balls at the time of impact, then deduce the resulting directions for each ball from that....?
+    def ball_to_ball_collision(ball_1_x, ball_1_y, ball_1_speed, ball_1_direction, ball_2_x, ball_2_y, ball_2_speed, ball_2_direction):
+        # check if the balls are touching
+        ball_2_direction = get_angle(ball_1_x, ball_1_y, ball_2_x, ball_2_y)
+        return ball_1_direction, ball_2_direction
+
+
+    # check if balls are touching
+    for ball_instance in Ball:
+        # make sure the ball is not comparing it own position, with it's own position
+        if ball_x != ball_instance.x and ball_y != ball_instance.y:
+            # check if the cue ball is touching/contacts the eight ball
+            if ball_x > ball_instance.x-7 and ball_x < ball_instance.x+14: # check the x-axis
+                if ball_y > ball_instance.y-14 and ball_y < ball_instance.y+14:# check the y-axis
+                    ball_instance.direction = get_angle(ball_x, ball_y, ball_instance.x, ball_instance.y)
+                    print "contact"
+
+
+    
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
     ball_x += ball_x_increment*ball_speed
