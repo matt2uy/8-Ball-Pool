@@ -1,4 +1,4 @@
-# To do: git commit -m"Added all balls in their correct starting positions"..."Ball to ball collisions"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
+# To do: git commit -m"Ball to ball collisions"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
@@ -17,23 +17,39 @@ cue_end_y = 0
 cue_buffer = 0
 balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
 
+# this class allows the ball class to be iterable (which I use later in a few functions).
+# Got this tip from: http://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
+class IterRegistry(type):
+    def __iter__(cls):
+        return iter(cls._registry)
+
 # Defining the ball class
 class Ball():
+    __metaclass__ = IterRegistry
+    _registry = []
+    
     def __init__(self):
+        self._registry.append(self)
         self.x = 220
         self.y = 200
         self.direction = 0 # angle is represented in degrees
         self.speed = 0
         self.pocketed = False
-        
+
+for ball_instance in Ball:
+    print ball_instance.x
+    
 # create an instance of each ball on the table
 cue_ball = Ball()
 cue_ball.x = 205 # exactly on the left third
 cue_ball.y = 200
 
 eight_ball = Ball() # third column, second row
-eight_ball.x = 495 # exactly on the right third x-value
+# temp values for testing:
+eight_ball.x = 295
 eight_ball.y = 200
+#eight_ball.x = 495 # exactly on the right third x-value
+#eight_ball.y = 200
 
 # player one's balls (red)     # maybe make a function to make initializing the 16 balls a bit shorter
 red_ball_1 = Ball() # first column, first row
@@ -92,8 +108,6 @@ blue_ball_6.y = 213
 blue_ball_7 = Ball() # fifth column, fifth row
 blue_ball_7.x = 523
 blue_ball_7.y = 227
-
-
 
 ### Drawing Functions ###
 def draw_static_objects():
@@ -182,7 +196,7 @@ def convert_polar_coordinates_to_cartesian(x, y, angle, length):
     y += length * math.sin(math.radians(angle))
     return x, y
 
-def ball_to_cushion(ball_direction, ball_x, ball_y):                
+def ball_to_cushion_collision(ball_direction, ball_x, ball_y):                
     # hit the top cushion
     if ball_y < 72:
         if ball_direction > 270: # ball incoming from the left
@@ -224,9 +238,11 @@ def check_if_ball_pocketed(ball_x, ball_y):
     # check for bottom left pocket'''
 
 def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed):
-    # Alter the ball's path if there is a collision
-    ball_direction = ball_to_cushion(ball_direction, ball_x, ball_y)
-    ### Move the ball in the correct direction based on cue_ball_direction
+    # check for a ball to wall collision
+    ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
+    # check for a ball to ball collision
+    #ball_direction = ball_to_ball_collision() # in the function -> if balls are touching and at least one is moving -> transfer 50% of first ball's speed? and subtract the first ball's speed by 50%? ... in terms of angle/direction, get the angle created between both balls at the time of impact, then deduce the resulting directions for each ball from that....?
+    ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
     ball_x += ball_x_increment*ball_speed
     ball_y += ball_y_increment*ball_speed
@@ -238,11 +254,11 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     return ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
 
 ### Colours ###
-BROWN = (130, 84, 65) # cue
-GREEN = (51, 163, 47) # pool table surface
-RED = (222, 24, 24) # red balls
-BLUE = (24, 24, 222) # blue balls
-BLACK = (0, 0, 0) # background
+BROWN = (130, 84, 65)   # cue
+GREEN = (51, 163, 47)   # pool table surface
+RED = (222, 24, 24)     # red balls
+BLUE = (24, 24, 222)    # blue balls
+BLACK = (0, 0, 0)       # background
 WHITE = (255, 255, 255) # cue ball
 
 pygame.init()
@@ -270,7 +286,7 @@ while not done:
     screen.fill(BLACK) # background
     draw_static_objects()
     draw_balls()
-
+    
     # Get the mouse press values
     mouse_left = get_mouse_press()
 
@@ -309,29 +325,18 @@ while not done:
             balls_in_movement = True
             mouse_held = False 
 
-    # Balls are active        
-    else: 
-        # this means that the ball is not stationary at this frame
+    # Balls are currently moving        
+    else:
+        # update the all of the ball's variables
         if cue_ball.speed > 0:
-            # update the ball's location and status
+            # one function that does it all, for this ball
             cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed = manage_ball_status(cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed)
 
-            if cue_ball.x > 500 :#== red_ball_1.x and cue_ball_y == red_ball_1.y:
-                red_ball_1.direction = 45
-                red_ball_1.speed = 5
-
-        if red_ball_1.speed > 0:
-            # Alter the ball's path if there is a collision
-            red_ball_1.direction = ball_to_cushion(red_ball_1.direction, red_ball_1.x, red_ball_1.y)
-            '''### Move the ball in the correct direction based on red_ball_direction
-            red_ball_x_increment, red_ball_y_increment = angle_to_coordinates(red_ball_direction, red_ball_x, red_ball_y)
-            red_ball_x += red_ball_x_increment*red_ball_speed
-            red_ball_y += red_ball_y_increment*red_ball_speed'''
-            # gradually reduce the ball's speed due to gravity
-            red_ball_1.speed -= 1
+        if eight_ball.speed > 0:
+            eight_ball.direction, eight_ball.x, eight_ball.y, eight_ball.speed, eight_ball.pocketed = manage_ball_status(eight_ball.direction, eight_ball.x, eight_ball.y, eight_ball.speed, eight_ball.pocketed)
             
-        # all balls have stopped moving
-        if cue_ball.speed <= 0 and red_ball_1.speed <= 0:
+        # if all balls have stopped moving, then inform the if statement above
+        if cue_ball.speed <= 0 and eight_ball.speed <= 0: # maybe loop through all balls in a function?
             balls_in_movement = False
             
     ### Updating the cue's position and drawing it ###
@@ -354,7 +359,7 @@ while not done:
     cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
     cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
 
-    # draw the cue when the balls aren't moving
+    # show the cue when the balls have stopped moving
     if balls_in_movement == False:
         pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
     
@@ -365,6 +370,4 @@ while not done:
     clock.tick(60)
  
 # Close the window and quit.
-# If you forget this line, the program will 'hang'
-# on exit if running from IDLE.
 pygame.quit()
