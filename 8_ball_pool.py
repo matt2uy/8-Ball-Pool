@@ -35,6 +35,7 @@ class Ball():
         self.direction = 0 # angle is represented in degrees
         self.speed = 0
         self.pocketed = False
+        self.in_contact = False # temp?
 
 for ball_instance in Ball:
     print ball_instance.x
@@ -247,18 +248,28 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
         ball_2_direction = get_angle(ball_1_x, ball_1_y, ball_2_x, ball_2_y)
         return ball_1_direction, ball_2_direction
 
-
     # check if balls are touching
     for ball_instance in Ball:
-        # make sure the ball is not comparing it own position, with it's own position
+        # make sure the ball is not comparing it's location, with it's self
         if ball_x != ball_instance.x and ball_y != ball_instance.y:
             # check if the cue ball is touching/contacts the eight ball
             if ball_x > ball_instance.x-7 and ball_x < ball_instance.x+14: # check the x-axis
-                if ball_y > ball_instance.y-14 and ball_y < ball_instance.y+14:# check the y-axis
-                    ball_instance.direction = get_angle(ball_x, ball_y, ball_instance.x, ball_instance.y)
-                    print "contact"
-
-
+                if ball_y > ball_instance.y-14 and ball_y < ball_instance.y+14: # check the y-axis
+                    # now it is confirmed that they are touching, or are in contact
+                    if ball_instance.in_contact == False: # make sure it doesn't do the below twice, for only one contact
+                        ball_instance.direction = get_angle(ball_instance.x, ball_instance.y, ball_x, ball_y)
+                        ball_instance.speed = ball_speed*0.75
+                        ball_speed *= 0.75
+                        
+                        ball_instance.in_contact = True
+                        print "direction: ", ball_instance.direction
+                else: # passed one test but is ultimately not in contact
+                    if ball_instance.in_contact == True:
+                        ball_instance.in_contact = False
+            else: # not in contact
+                if ball_instance.in_contact == True:
+                        ball_instance.in_contact = False
+                        
     
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
