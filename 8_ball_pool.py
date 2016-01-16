@@ -1,4 +1,4 @@
-# To do: git commit -m"Ball to ball collisions"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
+# To do: git commit -m"Expanded ball control functions from two balls to every ball"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
@@ -37,8 +37,6 @@ class Ball():
         self.pocketed = False
         self.in_contact = False # temp?
 
-for ball_instance in Ball:
-    print ball_instance.x
     
 # create an instance of each ball on the table
 cue_ball = Ball()
@@ -262,25 +260,36 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
                         ball_speed *= 0.75
                         
                         ball_instance.in_contact = True
-                        print "direction: ", ball_instance.direction
                 else: # passed one test but is ultimately not in contact
                     if ball_instance.in_contact == True:
                         ball_instance.in_contact = False
             else: # not in contact
                 if ball_instance.in_contact == True:
                         ball_instance.in_contact = False
-                        
     
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
     ball_x += ball_x_increment*ball_speed
     ball_y += ball_y_increment*ball_speed
     # gradually reduce the ball's speed due to gravity
-    ball_speed -= 0.1
+    ball_speed -= 0.05
 
     ## Check if it gets pocketed
     ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
     return ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
+
+def check_if_balls_moving():
+    no_movement_so_far = True # will be true if the balls were moving in the last frame
+    for ball_instance in Ball:   
+        if ball_instance.speed <= 0 and no_movement_so_far == True:
+            no_movement_so_far = True
+        else:
+            no_movement_so_far = False
+                        
+    if no_movement_so_far == True:
+        return False
+    else:
+        return True
 
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
@@ -357,16 +366,14 @@ while not done:
     # Balls are currently moving        
     else:
         # update the all of the ball's variables
-        if cue_ball.speed > 0:
-            # one function that does it all, for this ball
-            cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed = manage_ball_status(cue_ball.direction, cue_ball.x, cue_ball.y, cue_ball.speed, cue_ball.pocketed)
-
-        if eight_ball.speed > 0:
-            eight_ball.direction, eight_ball.x, eight_ball.y, eight_ball.speed, eight_ball.pocketed = manage_ball_status(eight_ball.direction, eight_ball.x, eight_ball.y, eight_ball.speed, eight_ball.pocketed)
-            
+        for ball_instance in Ball:
+            if ball_instance.speed > 0:
+                # one function that does it all, for this ball
+                ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
+     
         # if all balls have stopped moving, then inform the if statement above
-        if cue_ball.speed <= 0 and eight_ball.speed <= 0: # maybe loop through all balls in a function?
-            balls_in_movement = False
+        balls_in_movement = check_if_balls_moving()
+        
             
     ### Updating the cue's position and drawing it ###
     # Get the angle between the mouse and the cue ball
