@@ -1,4 +1,4 @@
-# To do: git commit -m"Expanded ball control functions from two balls to every ball"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
+# To do: git commit -m"Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Refined ball collisions"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
@@ -223,6 +223,28 @@ def ball_to_cushion_collision(ball_direction, ball_x, ball_y):
             ball_direction += 90
     return ball_direction
 
+def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
+    for ball_instance in Ball:
+        # make sure the ball is not comparing it's location, with it's self
+        if ball_x != ball_instance.x and ball_y != ball_instance.y:
+            # check if the cue ball is touching/contacts the eight ball
+            if ball_x > ball_instance.x-7 and ball_x < ball_instance.x+14: # check the x-axis
+                if ball_y > ball_instance.y-14 and ball_y < ball_instance.y+14: # check the y-axis
+                    # now it is confirmed that they are touching, or are in contact
+                    if ball_instance.in_contact == False: # make sure it doesn't do the below twice, for only one contact
+                        ball_instance.direction = get_angle(ball_instance.x, ball_instance.y, ball_x, ball_y)
+                        ball_instance.speed = ball_speed*0.75
+                        ball_speed *= 0.75
+                            
+                        ball_instance.in_contact = True
+                else: # passed one test but is ultimately not in contact
+                    if ball_instance.in_contact == True:
+                        ball_instance.in_contact = False
+            else: # not in contact
+                if ball_instance.in_contact == True:
+                        ball_instance.in_contact = False
+    return ball_speed, ball_direction
+
 def check_if_ball_pocketed(ball_x, ball_y):
     ball_pocketed = False
     # check for top left pocket
@@ -240,32 +262,7 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     # check for a ball to wall collision
     ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
     # check for a ball to ball collision
-    #ball_direction = ball_to_ball_collision() # in the function -> if balls are touching and at least one is moving -> transfer 50% of first ball's speed? and subtract the first ball's speed by 50%? ... in terms of angle/direction, get the angle created between both balls at the time of impact, then deduce the resulting directions for each ball from that....?
-    def ball_to_ball_collision(ball_1_x, ball_1_y, ball_1_speed, ball_1_direction, ball_2_x, ball_2_y, ball_2_speed, ball_2_direction):
-        # check if the balls are touching
-        ball_2_direction = get_angle(ball_1_x, ball_1_y, ball_2_x, ball_2_y)
-        return ball_1_direction, ball_2_direction
-
-    # check if balls are touching
-    for ball_instance in Ball:
-        # make sure the ball is not comparing it's location, with it's self
-        if ball_x != ball_instance.x and ball_y != ball_instance.y:
-            # check if the cue ball is touching/contacts the eight ball
-            if ball_x > ball_instance.x-7 and ball_x < ball_instance.x+14: # check the x-axis
-                if ball_y > ball_instance.y-14 and ball_y < ball_instance.y+14: # check the y-axis
-                    # now it is confirmed that they are touching, or are in contact
-                    if ball_instance.in_contact == False: # make sure it doesn't do the below twice, for only one contact
-                        ball_instance.direction = get_angle(ball_instance.x, ball_instance.y, ball_x, ball_y)
-                        ball_instance.speed = ball_speed*0.75
-                        ball_speed *= 0.75
-                        
-                        ball_instance.in_contact = True
-                else: # passed one test but is ultimately not in contact
-                    if ball_instance.in_contact == True:
-                        ball_instance.in_contact = False
-            else: # not in contact
-                if ball_instance.in_contact == True:
-                        ball_instance.in_contact = False
+    ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
     
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
