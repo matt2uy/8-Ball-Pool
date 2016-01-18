@@ -1,4 +1,4 @@
-# To do: git commit -m"Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Refined ball collisions"..."Fixed pool table dimensions"..."Increased window size"..."Added menu"
+# To do: git commit -m"Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Fixed pool table dimensions"..."Increased window size"..."Ball pocketing enabled"
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
@@ -11,6 +11,8 @@ import pygame, math
 # ... colour's RGB values will change as the sun "sets"
 
 ### Game variables ###
+game_in_progress = False
+show_instructions = False# a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
 cue_end_x = 0
 cue_end_y = 0
@@ -316,85 +318,126 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-            
-    ### Drawing the playing area ###
-    screen.fill(BLACK) # background
-    draw_static_objects()
-    draw_balls()
-    
-    # Get the mouse press values
-    mouse_left = get_mouse_press()
 
-    # keep updating cue position
-    mouse_x, mouse_y = pygame.mouse.get_pos()    
-    
-    # Update the cue's position + check whether the cue has hit the ball
-    if balls_in_movement == False:
-        # the first moment that the mouse is clicked
-        if mouse_left == True and mouse_held == False:
-            mouse_held = True
-            orig_mouse_x = mouse_x
-            orig_mouse_y = mouse_y
-        # the duration of time WHILE the mouse is being clicked/held
-        elif mouse_left == True and mouse_held == True:
-            # The amount the cue will move will depend on ...
-            # ... the distance between the current mouse ...
-            # ... position and the position it was at when clicked
-            
-            mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, mouse_x, mouse_y)
-            if mouse_distance_travelled > 100: # limit the distance that the cue can be pulled back
-                mouse_distance_travelled = 100
+    # Show the menu
+    if game_in_progress == False:
+        # get mouse position and click status
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        mouse_left = get_mouse_press()
 
-            # now move the cue backwards along the same angle
-            cue_buffer = mouse_distance_travelled
-    
-            # change the amount of power/ball speed it will transfer
-            # ... depending of the distance between the cue and the cue ball
-            cue_ball.speed = mouse_distance_travelled/7
-            
-        # mouse is released AFTER being clicked at first (previous elif statement)
-        elif mouse_left == False and mouse_held == True:
-            cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
-            # set the cue ball variables and set the balls_in_movement variable in motion
-            cue_ball.direction = mouse_degs
-            balls_in_movement = True
-            mouse_held = False 
-
-    # Balls are currently moving        
-    else:
-        # update the all of the ball's variables
-        for ball_instance in Ball:
-            if ball_instance.speed > 0:
-                # one function that does it all, for this ball
-                ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
-     
-        # if all balls have stopped moving, then inform the if statement above
-        balls_in_movement = check_if_balls_moving()
+        if show_instructions == False:
+            # if mouse is hovering over a button, then highlight that button
+            if mouse_x > 270 and mouse_x < 400 and mouse_y > 195 and mouse_y < 235:     # start game
+                myimage = pygame.image.load("Images/menu_play.png")
+                if mouse_left == True:
+                    game_in_progress = True
+            elif mouse_x > 270 and mouse_x < 400 and mouse_y > 240 and mouse_y < 285:   # show instructions
+                myimage = pygame.image.load("Images/menu_instructions.png")
+                if mouse_left == True:
+                    show_instructions = True
+            elif mouse_x > 270 and mouse_x < 400 and mouse_y > 290 and mouse_y < 335:   # exit game
+                myimage = pygame.image.load("Images/menu_quit.png")
+                if mouse_left == True:
+                    pygame.quit()
+            else:
+                myimage = pygame.image.load("Images/menu_unselected.png")
+        else: # show the instructions
+            if mouse_x > 20 and mouse_x < 160 and mouse_y > 20 and mouse_y < 65:     # start game
+                myimage = pygame.image.load("Images/instructions_selected.png")
+                if mouse_left == True:
+                    show_instructions = False
+            else:
+                myimage = pygame.image.load("Images/instructions.png")
         
+        # load and draw the menu
+        imagerect = myimage.get_rect()
+        screen.fill(BLACK)
+        screen.blit(myimage, imagerect)
+        pygame.display.flip()
+    
+    elif game_in_progress == True:       
+        ### Drawing the playing area ###
+        screen.fill(BLACK) # background
+        draw_static_objects()
+        draw_balls()
+        
+        # Get the mouse press values
+        mouse_left = get_mouse_press()
+
+        # keep updating cue position
+        mouse_x, mouse_y = pygame.mouse.get_pos()    
+        
+        # Update the cue's position + check whether the cue has hit the ball
+        if balls_in_movement == False:
+            # the first moment that the mouse is clicked
+            if mouse_left == True and mouse_held == False:
+                mouse_held = True
+                orig_mouse_x = mouse_x
+                orig_mouse_y = mouse_y
+            # the duration of time WHILE the mouse is being clicked/held
+            elif mouse_left == True and mouse_held == True:
+                # The amount the cue will move will depend on ...
+                # ... the distance between the current mouse ...
+                # ... position and the position it was at when clicked
+                
+                mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, mouse_x, mouse_y)
+                if mouse_distance_travelled > 100: # limit the distance that the cue can be pulled back
+                    mouse_distance_travelled = 100
+
+                # now move the cue backwards along the same angle
+                cue_buffer = mouse_distance_travelled
+        
+                # change the amount of power/ball speed it will transfer
+                # ... depending of the distance between the cue and the cue ball
+                cue_ball.speed = mouse_distance_travelled/7
+                
+            # mouse is released AFTER being clicked at first (previous elif statement)
+            elif mouse_left == False and mouse_held == True:
+                cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
+                # set the cue ball variables and set the balls_in_movement variable in motion
+                cue_ball.direction = mouse_degs
+                balls_in_movement = True
+                mouse_held = False 
+
+        # Balls are currently moving        
+        else:
+            # update the all of the ball's variables
+            for ball_instance in Ball:
+                if ball_instance.speed > 0:
+                    # one function that does it all, for this ball
+                    ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
+         
+            # if all balls have stopped moving, then inform the if statement above
+            balls_in_movement = check_if_balls_moving()
             
-    ### Updating the cue's position and drawing it ###
-    # Get the angle between the mouse and the cue ball
-    mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
-    
-    cue_front_x = mouse_x
-    cue_back_x = mouse_x
-    cue_front_y = mouse_y
-    cue_back_y = mouse_y
+                
+        ### Updating the cue's position and drawing it ###
+        # Get the angle between the mouse and the cue ball
+        mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
+        
+        cue_front_x = mouse_x
+        cue_back_x = mouse_x
+        cue_front_y = mouse_y
+        cue_back_y = mouse_y
 
-    # Get cue end to ball length (AKA: length of the cue)
-    mouse_to_ball_length = get_distance(cue_ball.x, cue_ball.y, cue_front_x, cue_front_y)
-    
-    # limit the length of the cue
-    cue_length = mouse_to_ball_length-200-cue_buffer
-    ball_to_cue_distance = mouse_to_ball_length-20-cue_buffer
-    
-    # get two pairs of the cue's coordinates from their polar coordinates (mouse angle + distance from the cue ball)
-    cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
-    cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
+        # Get cue end to ball length (AKA: length of the cue)
+        mouse_to_ball_length = get_distance(cue_ball.x, cue_ball.y, cue_front_x, cue_front_y)
+        
+        # limit the length of the cue
+        cue_length = mouse_to_ball_length-200-cue_buffer
+        ball_to_cue_distance = mouse_to_ball_length-20-cue_buffer
+        
+        # get two pairs of the cue's coordinates from their polar coordinates (mouse angle + distance from the cue ball)
+        cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
+        cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
 
-    # show the cue when the balls have stopped moving
-    if balls_in_movement == False:
-        pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
+        # show the cue when the balls have stopped moving
+        if balls_in_movement == False:
+            pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
+
+        # if the game seems to be done...
+        #if...???
+        #game_in_progress = False
     
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
