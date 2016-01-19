@@ -1,5 +1,5 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
-# To do: git commit -m"Ball pocketing counter"..."Show end game sequence"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"...# Name: Matthew Uy
+# To do: git commit -m"End game scenarios"..."Added turns"..."Player names?"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"...# Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
 # Description: 
@@ -12,6 +12,7 @@ import pygame, math
 
 ### Game variables ###
 game_in_progress = False
+current_player_turn = "Red"
 show_instructions = False# a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
 cue_end_x = 0
@@ -149,7 +150,6 @@ def draw_scoreboard():
                 num_of_blue_left += 1
             elif ball_instance.colour == "Red":
                 num_of_red_left += 1
-    print num_of_red_left, num_of_blue_left
                 
     # draw the red balls left
     for ball in range(num_of_red_left):
@@ -341,6 +341,45 @@ def check_if_balls_moving():
     else:
         return True
 
+def check_if_game_over(game_in_progress, current_player_turn):
+    # check if escape key is pressed
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                game_in_progress = False
+
+    # check if black ball is pocketed
+    if eight_ball.pocketed == True:
+        game_in_progress = False
+        ### if the game is actually over, run through the game end sequence
+        # get the number of red and blue balls
+        num_of_red_left = 0
+        num_of_blue_left = 0
+        for ball_instance in Ball:
+            if ball_instance.pocketed == False:
+                if ball_instance.colour == "Blue":
+                    num_of_blue_left += 1
+                elif ball_instance.colour == "Red":
+                    num_of_red_left += 1
+                    
+        if current_player_turn == "Blue":
+            if num_of_blue_left == 0:
+                winner = "Blue"
+            else:
+                winner = "Red"
+        elif current_player_turn == "Red":
+            if num_of_red_left == 0:
+                winner = "Red"
+            else:
+                winner = "Blue"
+
+        # print "game over" message, plus the player who won
+        print "game over"
+        print winner, "wins"
+        
+    return game_in_progress
+
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
 GREEN = (51, 163, 47)   # pool table surface
@@ -489,11 +528,8 @@ while not done:
             pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
 
         # if the game seems to be done...
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    game_in_progress = False
+        game_in_progress = check_if_game_over(game_in_progress, current_player_turn)
+        
     
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
