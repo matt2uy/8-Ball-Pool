@@ -1,4 +1,4 @@
-# To do: git commit -m"Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Fixed pool table dimensions"..."Increased window size"..."Ball pocketing enabled"
+# To do: git commit -m"Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Ball pocketing enabled"
 # Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
@@ -331,6 +331,7 @@ while not done:
                 myimage = pygame.image.load("Images/menu_play.png")
                 if mouse_left == True:
                     game_in_progress = True
+                    pygame.mouse.set_pos([100,200]) # set mouse to proper starting position
             elif mouse_x > 270 and mouse_x < 400 and mouse_y > 240 and mouse_y < 285:   # show instructions
                 myimage = pygame.image.load("Images/menu_instructions.png")
                 if mouse_left == True:
@@ -436,8 +437,11 @@ while not done:
             pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
 
         # if the game seems to be done...
-        #if...???
-        #game_in_progress = False
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game_in_progress = False
     
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
