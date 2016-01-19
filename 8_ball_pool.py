@@ -1,5 +1,4 @@
-# To do: git commit -m"Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Ball pocketing enabled"
-# Name: Matthew Uy
+# To do: git commit -m"Ball pocketing counter"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"...# Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
 # Description: Github repo: https://github.com/matt2uy/8-Ball-Pool
@@ -250,15 +249,31 @@ def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
 def check_if_ball_pocketed(ball_x, ball_y):
     ball_pocketed = False
     # check for top left pocket
-    if ball_x > 60 and ball_x < 80 and ball_y > 60 and ball_y < 80:
+    if ball_x > 50 and ball_x < 70 and ball_y > 60 and ball_y < 80:
         # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
-    return ball_pocketed
-    '''# check for top middle pocket
+    # check for top middle pocket
+    elif ball_x > 350 and ball_x < 370 and ball_y > 60 and ball_y < 80:
+        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
+        ball_pocketed = True
     # check for top right pocket
+    elif ball_x > 630 and ball_x < 650 and ball_y > 60 and ball_y < 80:
+        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
+        ball_pocketed = True
     # check for bottom right pocket
+    elif ball_x > 630 and ball_x < 650 and ball_y > 320 and ball_y < 340:
+        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
+        ball_pocketed = True
     # check for bottom middle pocket
-    # check for bottom left pocket'''
+    elif ball_x > 350 and ball_x < 370 and ball_y > 320 and ball_y < 340:
+        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
+        ball_pocketed = True
+    # check for bottom left pocket
+    elif ball_x > 50 and ball_x < 70 and ball_y > 320 and ball_y < 340:
+        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
+        ball_pocketed = True
+        
+    return ball_pocketed
 
 def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed):
     # check for a ball to wall collision
@@ -404,7 +419,7 @@ while not done:
         else:
             # update the all of the ball's variables
             for ball_instance in Ball:
-                if ball_instance.speed > 0:
+                if ball_instance.speed > 0 and ball_instance.pocketed == False:
                     # one function that does it all, for this ball
                     ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
          
