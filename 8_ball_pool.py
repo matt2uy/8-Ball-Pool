@@ -1,8 +1,9 @@
-# To do: git commit -m"Ball pocketing counter"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"...# Name: Matthew Uy
+# Github repository: https://github.com/matt2uy/8-Ball-Pool
+# To do: git commit -m"Ball pocketing counter"..."Show end game sequence"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"...# Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
-# Description: Github repo: https://github.com/matt2uy/8-Ball-Pool
-# Lab requirements: ?
+# Description: 
+# Lab requirements: Located inside the final report
 
 import pygame, math
 # Got the colour values from http://www.colorpicker.com/
@@ -31,6 +32,7 @@ class Ball():
     
     def __init__(self):
         self._registry.append(self)
+        self.colour = "unspecified"
         self.x = 220
         self.y = 200
         self.direction = 0 # angle is represented in degrees
@@ -53,59 +55,73 @@ eight_ball.y = 200
 
 # player one's balls (red)     # maybe make a function to make initializing the 16 balls a bit shorter
 red_ball_1 = Ball() # first column, first row
+red_ball_1.colour = "Red"
 red_ball_1.x = 467 
-red_ball_1.y = 200 
+red_ball_1.y = 200
 
 red_ball_2 = Ball() # second column, first row
+red_ball_2.colour = "Red"
 red_ball_2.x = 481
 red_ball_2.y = 193
 
 red_ball_3 = Ball() # third column, third row
+red_ball_3.colour = "Red"
 red_ball_3.x = 495
 red_ball_3.y = 214
 
 red_ball_4 = Ball() # fourth column, first row
+red_ball_4.colour = "Red"
 red_ball_4.x = 509
 red_ball_4.y = 178
 
 red_ball_5 = Ball() # fourth column, third row
+red_ball_5.colour = "Red"
 red_ball_5.x = 509
 red_ball_5.y = 206
 
 red_ball_6 = Ball() # fifth column, first row
+red_ball_6.colour = "Red"
 red_ball_6.x = 523
 red_ball_6.y = 171
 
 red_ball_7 = Ball() # fifth column, third row
+red_ball_7.colour = "Red"
 red_ball_7.x = 523
 red_ball_7.y = 199
 
 # player two's balls (blue)
 blue_ball_1 = Ball() # second column, second row
+blue_ball_1.colour = "Blue"
 blue_ball_1.x = 481
 blue_ball_1.y = 207
 
 blue_ball_2 = Ball()
 blue_ball_2.x = 495  # third column, first row
+blue_ball_2.colour = "Blue"
 blue_ball_2.y = 186
 
 blue_ball_3 = Ball() # fourth column, second row
+blue_ball_3.colour = "Blue"
 blue_ball_3.x = 509
 blue_ball_3.y = 192
 
 blue_ball_4 = Ball() # fourth column, fourth row
+blue_ball_4.colour = "Blue"
 blue_ball_4.x = 509
 blue_ball_4.y = 220
 
 blue_ball_5 = Ball() # fifth column, second row
+blue_ball_5.colour = "Blue"
 blue_ball_5.x = 523
 blue_ball_5.y = 185
 
 blue_ball_6 = Ball() # fifth column, fourth row
+blue_ball_6.colour = "Blue"
 blue_ball_6.x = 523
 blue_ball_6.y = 213
 
 blue_ball_7 = Ball() # fifth column, fifth row
+blue_ball_7.colour = "Blue"
 blue_ball_7.x = 523
 blue_ball_7.y = 227
 
@@ -122,6 +138,26 @@ def draw_static_objects():
     pygame.draw.circle(screen, BLACK, (60, 340), 12, 0)     # bottom left
     pygame.draw.circle(screen, BLACK, (350, 340), 12, 0)    # bottom middle
     pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)    # bottom right
+
+def draw_scoreboard():
+    num_of_red_left = 0
+    num_of_blue_left = 0
+    # get the number of red and blue balls
+    for ball_instance in Ball:
+        if ball_instance.pocketed == False:
+            if ball_instance.colour == "Blue":
+                num_of_blue_left += 1
+            elif ball_instance.colour == "Red":
+                num_of_red_left += 1
+    print num_of_red_left, num_of_blue_left
+                
+    # draw the red balls left
+    for ball in range(num_of_red_left):
+        pygame.draw.circle(screen, RED, (100+ball*20, 20), 7, 0)
+    
+    # draw the blue balls left
+    for ball in range(num_of_blue_left):
+        pygame.draw.circle(screen, BLUE, (500+ball*20, 20), 7, 0)
 
 def draw_balls():
     # draw the cue and eight balls
@@ -375,6 +411,7 @@ while not done:
         ### Drawing the playing area ###
         screen.fill(BLACK) # background
         draw_static_objects()
+        draw_scoreboard()
         draw_balls()
         
         # Get the mouse press values
