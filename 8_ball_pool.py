@@ -1,7 +1,11 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
-# To do: git commit -m"End game scenarios"..."Added turns"..."Player names?"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Ball in hand scenarios"...
+# To do:
+    # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
+        #..."maybe check the ball/wall collisions for every pixel of movement "
+    # Gameplay: "Refined player turns (added previous ball count variable/cue ball sunk)"..."Ball in hand scenarios"..."End game scenarios"..."
+    # Presentation: "Player names?"...
 # Name: Matthew Uy
-# Date: December 7, 2015
+# Date: January 22, 2016
 # Assignment: CPT - "8 Ball Pool"
 # Description: 
 # Lab requirements: Located inside the final report
@@ -13,10 +17,13 @@ import pygame, math
 
 ### Game variables ###
 game_in_progress = False
+# variables used in determine_player_turn(), to find out which player is currently controlling the cue
 current_player_turn = "Red"
 current_shot_count = 0
 previous_shot_count = 0
-show_instructions = False# a variable for the menu
+ball_pocketed_in_this_shot = False
+
+show_instructions = False # a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
 cue_end_x = 0
 cue_end_y = 0
@@ -235,6 +242,7 @@ def convert_polar_coordinates_to_cartesian(x, y, angle, length):
     y += length * math.sin(math.radians(angle))
     return x, y
 
+
 def ball_to_cushion_collision(ball_direction, ball_x, ball_y):                
     # hit the top cushion
     if ball_y < 72:
@@ -286,30 +294,25 @@ def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
     return ball_speed, ball_direction
 
 def check_if_ball_pocketed(ball_x, ball_y):
-    ball_pocketed = False
-    # check for top left pocket
+    ball_pocketed = False # maght not be necessary, because it is assumed the only the unpocketed ball instances go through  'manage_ball_status()', and in turn, this function.
+    # check the top left pocket
     if ball_x > 50 and ball_x < 70 and ball_y > 60 and ball_y < 80:
         # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
-    # check for top middle pocket
+    # check the top middle pocket
     elif ball_x > 350 and ball_x < 370 and ball_y > 60 and ball_y < 80:
-        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
-    # check for top right pocket
+    # check the top right pocket
     elif ball_x > 630 and ball_x < 650 and ball_y > 60 and ball_y < 80:
-        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
-    # check for bottom right pocket
+    # check the bottom right pocket
     elif ball_x > 630 and ball_x < 650 and ball_y > 320 and ball_y < 340:
-        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
-    # check for bottom middle pocket
+    # check the bottom middle pocket
     elif ball_x > 350 and ball_x < 370 and ball_y > 320 and ball_y < 340:
-        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
-    # check for bottom left pocket
+    # check the bottom left pocket
     elif ball_x > 50 and ball_x < 70 and ball_y > 320 and ball_y < 340:
-        # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
         
     return ball_pocketed
@@ -325,7 +328,7 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     ball_x += ball_x_increment*ball_speed
     ball_y += ball_y_increment*ball_speed
     # gradually reduce the ball's speed due to gravity
-    ball_speed -= 0.05
+    ball_speed -= 0.095
 
     ## Check if it gets pocketed
     ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
@@ -386,17 +389,28 @@ def check_if_game_over(game_in_progress, current_player_turn):
     return game_in_progress
 
 
-def determine_player_turn(current_player_turn, current_shot_count, previous_shot_count):
+def determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot):
+    # confirm that another shot has been made
     if previous_shot_count < current_shot_count:
         previous_shot_count += 1
-        print "Current player in possesion: ", current_player_turn
-        # toggle player turn
-        if current_player_turn == "Red":
-            current_player_turn = "Blue"
-        elif current_player_turn == "Blue":
-            current_player_turn = "Red"
 
-    return current_player_turn, current_shot_count, previous_shot_count 
+        if ball_pocketed_in_this_shot == False or cue_ball.pocketed == True:            
+            # toggle player turn if a ball hasn't been pocketed in this turn
+            if current_player_turn == "Red":
+                current_player_turn = "Blue"
+            elif current_player_turn == "Blue":
+                current_player_turn = "Red"
+        else:
+            print "ball has been sunk, don't change player turn" # need to test out this print line check later
+            ball_pocketed_in_this_shot = False # reset the ball pocketed count (for the current shot)
+
+    # Draw an indicator, showing which player's turn it is
+    if current_player_turn == "Red":
+        pygame.draw.rect(screen, RED, [338, 7, 25, 25], 0)
+    elif current_player_turn == "Blue":
+        pygame.draw.rect(screen, BLUE, [338, 7, 25, 25], 0)
+
+    return current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot
 
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
@@ -517,6 +531,8 @@ while not done:
                 if ball_instance.speed > 0 and ball_instance.pocketed == False:
                     # one function that does it all, for this ball
                     ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
+                    if ball_instance.pocketed == True:
+                        ball_pocketed_in_this_shot = True
          
             # if all balls have stopped moving, then inform the if statement above
             balls_in_movement = check_if_balls_moving()
@@ -550,7 +566,7 @@ while not done:
         game_in_progress = check_if_game_over(game_in_progress, current_player_turn)
 
         # switch player turn if necessary
-        current_player_turn, current_shot_count, previous_shot_count = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count)
+        current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot)
     
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
