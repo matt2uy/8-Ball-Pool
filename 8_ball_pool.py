@@ -2,7 +2,7 @@
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
         #..."maybe check the ball/wall collisions for every pixel of movement "
-    # Gameplay: "Refined player turns (added previous ball count variable/cue ball sunk)"..."Ball in hand scenarios"..."End game scenarios"..."
+    # Gameplay: "Ball in hand scenarios"..."End game scenarios"..."
     # Presentation: "Player names?"...
 # Name: Matthew Uy
 # Date: January 22, 2016
@@ -44,7 +44,7 @@ class Ball():
     def __init__(self):
         self._registry.append(self)
         self.colour = "unspecified"
-        self.x = 220
+        self.x = 205
         self.y = 200
         self.direction = 0 # angle is represented in degrees
         self.speed = 0
@@ -531,7 +531,8 @@ while not done:
                 if ball_instance.speed > 0 and ball_instance.pocketed == False:
                     # one function that does it all, for this ball
                     ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
-                    if ball_instance.pocketed == True:
+                    # check and see if the player has pocketed the correct ball (and use this later to determine whether the player retains possesion for the next shot)
+                    if ball_instance.pocketed == True and ball_instance.colour == current_player_turn:
                         ball_pocketed_in_this_shot = True
          
             # if all balls have stopped moving, then inform the if statement above
@@ -539,6 +540,15 @@ while not done:
             
                 
         ### Updating the cue's position and drawing it ###
+        #re place the cue ball back to orig pos if it is currently pocketed ... later maybe drag it...
+        if cue_ball.pocketed:
+            cue_ball.pocketed = False
+            cue_ball.x = 205
+            cue_ball.y = 200
+            cue_ball.speed = 0
+            cue_ball.direction = 0
+
+        
         # Get the angle between the mouse and the cue ball
         mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
         
