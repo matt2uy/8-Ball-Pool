@@ -1,5 +1,6 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
-# To do: git commit -m"End game scenarios"..."Added turns"..."Player names?"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"...# Name: Matthew Uy
+# To do: git commit -m"End game scenarios"..."Added turns"..."Player names?"..."Refined ball to ball collisions"..."Fixed ball collisions bug (check out the '.in contact; variable"..."Ball in hand scenarios"...
+# Name: Matthew Uy
 # Date: December 7, 2015
 # Assignment: CPT - "8 Ball Pool"
 # Description: 
@@ -13,6 +14,8 @@ import pygame, math
 ### Game variables ###
 game_in_progress = False
 current_player_turn = "Red"
+current_shot_count = 0
+previous_shot_count = 0
 show_instructions = False# a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
 cue_end_x = 0
@@ -362,12 +365,14 @@ def check_if_game_over(game_in_progress, current_player_turn):
                     num_of_blue_left += 1
                 elif ball_instance.colour == "Red":
                     num_of_red_left += 1
-                    
+
+        # find out who won if rest of the player's balls have been pocketed
         if current_player_turn == "Blue":
             if num_of_blue_left == 0:
                 winner = "Blue"
             else:
                 winner = "Red"
+                
         elif current_player_turn == "Red":
             if num_of_red_left == 0:
                 winner = "Red"
@@ -379,6 +384,19 @@ def check_if_game_over(game_in_progress, current_player_turn):
         print winner, "wins"
         
     return game_in_progress
+
+
+def determine_player_turn(current_player_turn, current_shot_count, previous_shot_count):
+    if previous_shot_count < current_shot_count:
+        previous_shot_count += 1
+        print "Current player in possesion: ", current_player_turn
+        # toggle player turn
+        if current_player_turn == "Red":
+            current_player_turn = "Blue"
+        elif current_player_turn == "Blue":
+            current_player_turn = "Red"
+
+    return current_player_turn, current_shot_count, previous_shot_count 
 
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
@@ -485,6 +503,7 @@ while not done:
                 
             # mouse is released AFTER being clicked at first (previous elif statement)
             elif mouse_left == False and mouse_held == True:
+                current_shot_count += 1
                 cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
                 # set the cue ball variables and set the balls_in_movement variable in motion
                 cue_ball.direction = mouse_degs
@@ -529,7 +548,9 @@ while not done:
 
         # if the game seems to be done...
         game_in_progress = check_if_game_over(game_in_progress, current_player_turn)
-        
+
+        # switch player turn if necessary
+        current_player_turn, current_shot_count, previous_shot_count = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count)
     
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
