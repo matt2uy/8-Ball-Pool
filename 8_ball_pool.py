@@ -2,7 +2,7 @@
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
         #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"
-    # Gameplay: "Ball in hand scenarios (make it pulse at the right time"..."Drag the ball"..."End game scenarios"..."
+    # Gameplay: "Ball in hand (made it pulse at the right time)"..."Drag the ball"..."End game scenarios"..."
     # Presentation: "Player names?"...
 # Name: Matthew Uy
 # Date: January 22, 2016
@@ -551,6 +551,9 @@ while not done:
                 
             # mouse is released AFTER being clicked at first (previous elif statement)
             elif mouse_left == False and mouse_held == True:
+                # if the ball is in hand, "remove" in from that hand...
+                if cue_ball_in_hand:
+                    cue_ball_in_hand = False
                 current_shot_count += 1
                 cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
                 # set the cue ball variables and set the balls_in_movement variable in motion
@@ -575,10 +578,15 @@ while not done:
         ### Updating the cue's position and drawing it ###
         # Ball is currently in the opponents hand...until the next shot is made
         if cue_ball.pocketed:
+            print "pocketed"
+            cue_ball_in_hand = True
+            # reset ball variable (should be a one time thing)
+            ball_in_hand()
+
+        # ball is able to be dragged around by the player currently in possession
+        if cue_ball_in_hand:
             # pulse the cue ball, when the ball is in hand
             white_r, white_g, white_b, ball_pulse_multiplier, WHITE = pulse_cue_ball(white_r, white_g, white_b, ball_pulse_multiplier, WHITE)
-            cue_ball_in_hand = True
-            ball_in_hand()
         
         # Get the angle between the mouse and the cue ball
         mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
