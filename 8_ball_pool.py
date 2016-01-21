@@ -2,7 +2,7 @@
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
         #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"
-    # Gameplay: "Ball in hand (made it pulse at the right time)"..."Drag the ball"..."End game scenarios"..."
+    # Gameplay: "End game scenarios"..."
     # Presentation: "Player names?"...
 # Name: Matthew Uy
 # Date: January 22, 2016
@@ -36,6 +36,7 @@ ball_pocketed_in_this_shot = False
 # ball in hand variables
 cue_ball_in_hand = False
 cue_ball_opacity = 100
+cue_ball_dragged = False
 
 show_instructions = False # a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
@@ -532,28 +533,45 @@ while not done:
                 mouse_held = True
                 orig_mouse_x = mouse_x
                 orig_mouse_y = mouse_y
-            # the duration of time WHILE the mouse is being clicked/held
-            elif mouse_left == True and mouse_held == True:
-                # The amount the cue will move will depend on ...
-                # ... the distance between the current mouse ...
-                # ... position and the position it was at when clicked
-                
-                mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, mouse_x, mouse_y)
-                if mouse_distance_travelled > 100: # limit the distance that the cue can be pulled back
-                    mouse_distance_travelled = 100
 
-                # now move the cue backwards along the same angle
-                cue_buffer = mouse_distance_travelled
-        
-                # change the amount of power/ball speed it will transfer
-                # ... depending of the distance between the cue and the cue ball
-                cue_ball.speed = mouse_distance_travelled/7
+                # enable ball dragging if the ball is in hand, AND the mouse has clicked on the ball
+                if orig_mouse_x < cue_ball.x + 10 and  orig_mouse_x > cue_ball.x - 10:
+                        if orig_mouse_y < cue_ball.y + 10 and orig_mouse_y > cue_ball.y - 10:
+                            cue_ball_dragged = True
+            # the duration of time WHILE the mouse is being clicked/held
+            elif mouse_left == True and mouse_held == True:                
+            # in the case that the ball is in hand
+                if cue_ball_in_hand:
+                    if cue_ball_dragged == True:
+                            cue_ball.x = mouse_x
+                            cue_ball.y = mouse_y
+                            print "ball has been clicked while ball in hand"
+
+
+                else:
+                    # The amount the cue will move will depend on ...
+                    # ... the distance between the current mouse ...
+                    # ... position and the position it was at when clicked
+                    
+                    mouse_distance_travelled = get_distance(orig_mouse_x, orig_mouse_y, mouse_x, mouse_y)
+                    if mouse_distance_travelled > 100: # limit the distance that the cue can be pulled back
+                        mouse_distance_travelled = 100
+
+                    # now move the cue backwards along the same angle
+                    cue_buffer = mouse_distance_travelled
+            
+                    # change the amount of power/ball speed it will transfer
+                    # ... depending of the distance between the cue and the cue ball
+                    cue_ball.speed = mouse_distance_travelled/7
+
+
                 
             # mouse is released AFTER being clicked at first (previous elif statement)
             elif mouse_left == False and mouse_held == True:
                 # if the ball is in hand, "remove" in from that hand...
                 if cue_ball_in_hand:
                     cue_ball_in_hand = False
+                    cue_ball_dragged = False
                 current_shot_count += 1
                 cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
                 # set the cue ball variables and set the balls_in_movement variable in motion
@@ -587,6 +605,9 @@ while not done:
         if cue_ball_in_hand:
             # pulse the cue ball, when the ball is in hand
             white_r, white_g, white_b, ball_pulse_multiplier, WHITE = pulse_cue_ball(white_r, white_g, white_b, ball_pulse_multiplier, WHITE)
+        else:
+            # reset the white colour values
+            WHITE = (255, 255, 255) # cue ball            # duplicate?
         
         # Get the angle between the mouse and the cue ball
         mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
