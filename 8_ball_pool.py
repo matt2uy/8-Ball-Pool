@@ -1,7 +1,7 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
-        #..."maybe check the ball/wall collisions for every pixel of movement "
+        #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"
     # Gameplay: "Ball in hand scenarios"..."End game scenarios"..."
     # Presentation: "Player names?"...
 # Name: Matthew Uy
@@ -14,6 +14,21 @@ import pygame, math
 # Got the colour values from http://www.colorpicker.com/
 # The variables below each colour initialization represent how...
 # ... colour's RGB values will change as the sun "sets"
+### Colours ###
+BROWN = (130, 84, 65)   # cue
+green_r = 51
+green_g =  163
+green_b = 47
+GREEN = (green_r, green_g, green_b)   # pool table surface
+RED = (222, 24, 24)     # red balls
+BLUE = (24, 24, 222)    # blue balls
+BLACK = (0, 0, 0)       # background
+white_r = 255
+white_g = 255
+white_b = 255
+WHITE = (white_r, white_g, white_b) # cue ball
+# ball pulsing variable
+ball_pulse_multiplier = -0.5
 
 ### Game variables ###
 game_in_progress = False
@@ -22,6 +37,9 @@ current_player_turn = "Red"
 current_shot_count = 0
 previous_shot_count = 0
 ball_pocketed_in_this_shot = False
+# ball in hand variables
+cue_ball_in_hand = False
+cue_ball_opacity = 100
 
 show_instructions = False # a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
@@ -50,7 +68,6 @@ class Ball():
         self.speed = 0
         self.pocketed = False
         self.in_contact = False # temp?
-
     
 # create an instance of each ball on the table
 cue_ball = Ball()
@@ -173,6 +190,7 @@ def draw_balls():
     # draw the cue and eight balls
     if cue_ball.pocketed == False:
         pygame.draw.circle(screen, WHITE, (int(cue_ball.x), int(cue_ball.y)), 7, 0)
+
     if eight_ball.pocketed == False:
         pygame.draw.circle(screen, BLACK, (int(eight_ball.x), int(eight_ball.y)), 7, 0)
     # draw the red (player one) balls
@@ -207,6 +225,27 @@ def draw_balls():
     if blue_ball_7.pocketed == False:
         pygame.draw.circle(screen, BLUE, (int(blue_ball_7.x), int(blue_ball_7.y)), 7, 0)
 
+def pulse_cue_ball(white_r, white_g, white_b, ball_pulse_multiplier, WHITE):
+        # if the ball is in hand -> make it flash
+        # set the cue ball drawing to a fade in/out animation
+        if ball_in_hand:
+            white_r += 8*ball_pulse_multiplier
+            white_g += 5*ball_pulse_multiplier
+            white_b += 6*ball_pulse_multiplier
+            # determine whether the ball pulses 'towaards' or 'against' green or white
+            if white_g < green_g or white_g > 253: # 255 is the maximum rgb value, it is set to 250 to stay safe because white_r increments by 8
+                ball_pulse_multiplier *= -1
+
+        else:
+            # when the ball is not at hand, reset the ball colour and keep it static
+            white_r = 255
+            white_g = 255
+            white_b = 255
+            
+        # redefine the colour of the cue ball
+        WHITE = (white_r, white_g, white_b)
+
+        return white_r, white_g, white_b, ball_pulse_multiplier, WHITE
 ### User input functions ###
 def get_mouse_press():
     mouse_left = False
@@ -347,6 +386,17 @@ def check_if_balls_moving():
     else:
         return True
 
+def ball_in_hand():
+    # reset cue ball variables
+    cue_ball.pocketed = False
+    cue_ball.x = 205
+    cue_ball.y = 200
+    cue_ball.speed = 0
+    cue_ball.direction = 0
+    # reset mouse position
+    pygame.mouse.set_pos([100,200])
+
+    
 def check_if_game_over(game_in_progress, current_player_turn):
     # check if escape key is pressed
     events = pygame.event.get()
@@ -411,14 +461,6 @@ def determine_player_turn(current_player_turn, current_shot_count, previous_shot
         pygame.draw.rect(screen, BLUE, [338, 7, 25, 25], 0)
 
     return current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot
-
-### Colours ###
-BROWN = (130, 84, 65)   # cue
-GREEN = (51, 163, 47)   # pool table surface
-RED = (222, 24, 24)     # red balls
-BLUE = (24, 24, 222)    # blue balls
-BLACK = (0, 0, 0)       # background
-WHITE = (255, 255, 255) # cue ball
 
 pygame.init()
  
@@ -540,14 +582,12 @@ while not done:
             
                 
         ### Updating the cue's position and drawing it ###
-        #re place the cue ball back to orig pos if it is currently pocketed ... later maybe drag it...
+        # Ball is currently in the opponents hand...until the next shot is made
         if cue_ball.pocketed:
-            cue_ball.pocketed = False
-            cue_ball.x = 205
-            cue_ball.y = 200
-            cue_ball.speed = 0
-            cue_ball.direction = 0
-
+            # pulse the cue ball, when the ball is in hand
+            white_r, white_g, white_b, ball_pulse_multiplier, WHITE = pulse_cue_ball(white_r, white_g, white_b, ball_pulse_multiplier, WHITE)
+            cue_ball_in_hand = True
+            ball_in_hand()
         
         # Get the angle between the mouse and the cue ball
         mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
