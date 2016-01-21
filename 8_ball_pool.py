@@ -2,18 +2,14 @@
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
         #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"
-    # Gameplay: "Ball in hand scenarios"..."End game scenarios"..."
+    # Gameplay: "Ball in hand scenarios (make it pulse at the right time"..."Drag the ball"..."End game scenarios"..."
     # Presentation: "Player names?"...
 # Name: Matthew Uy
 # Date: January 22, 2016
 # Assignment: CPT - "8 Ball Pool"
-# Description: 
-# Lab requirements: Located inside the final report
+# Description and Lab requirements: Located inside the final report
 
 import pygame, math
-# Got the colour values from http://www.colorpicker.com/
-# The variables below each colour initialization represent how...
-# ... colour's RGB values will change as the sun "sets"
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
 green_r = 51
@@ -463,16 +459,12 @@ def determine_player_turn(current_player_turn, current_shot_count, previous_shot
     return current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot
 
 pygame.init()
- 
 # Set the width and height of the screen [width, height]
 size = (700, 400)
 screen = pygame.display.set_mode(size)
- 
 pygame.display.set_caption("8 Ball Pool")
- 
 # Loop until the user clicks the close button.
 done = False
- 
 # Manage how fast the screen updates
 clock = pygame.time.Clock()
 
@@ -579,7 +571,6 @@ while not done:
          
             # if all balls have stopped moving, then inform the if statement above
             balls_in_movement = check_if_balls_moving()
-            
                 
         ### Updating the cue's position and drawing it ###
         # Ball is currently in the opponents hand...until the next shot is made
@@ -597,7 +588,7 @@ while not done:
         cue_front_y = mouse_y
         cue_back_y = mouse_y
 
-        # Get cue end to ball length (AKA: length of the cue)
+        # Get the length of the cue)
         mouse_to_ball_length = get_distance(cue_ball.x, cue_ball.y, cue_front_x, cue_front_y)
         
         # limit the length of the cue
@@ -612,6 +603,7 @@ while not done:
         if balls_in_movement == False:
             pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
 
+        ### Game end and player turns ###
         # if the game seems to be done...
         game_in_progress = check_if_game_over(game_in_progress, current_player_turn)
 
