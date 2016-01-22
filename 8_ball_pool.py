@@ -13,6 +13,7 @@
 # Description and Lab requirements: Located inside the final report
 
 import pygame, math
+
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
 green_r = 51
@@ -71,87 +72,127 @@ class Ball():
     
 # create an instance of each ball on the table
 cue_ball = Ball()
-cue_ball.x = 380 # exactly on the left third
-cue_ball.y = 300
-
 eight_ball = Ball() # third column, second row
-# temp values for testing:
-eight_ball.x = 470
-eight_ball.y = 300
-#eight_ball.x = 670 # exactly on the right third x-value
-#eight_ball.y = 300
-
 # player one's balls (red)     # maybe make a function to make initializing the 16 balls a bit shorter
 red_ball_1 = Ball() # first column, first row
-red_ball_1.colour = "Red"
-red_ball_1.x = 642 
-red_ball_1.y = 300
-
 red_ball_2 = Ball() # second column, first row
 red_ball_2.colour = "Red"
-red_ball_2.x = 656
-red_ball_2.y = 293
 
 red_ball_3 = Ball() # third column, third row
 red_ball_3.colour = "Red"
-red_ball_3.x = 670
-red_ball_3.y = 314
 
 red_ball_4 = Ball() # fourth column, first row
 red_ball_4.colour = "Red"
-red_ball_4.x = 684
-red_ball_4.y = 278
 
 red_ball_5 = Ball() # fourth column, third row
 red_ball_5.colour = "Red"
-red_ball_5.x = 684
-red_ball_5.y = 306
 
 red_ball_6 = Ball() # fifth column, first row
 red_ball_6.colour = "Red"
-red_ball_6.x = 698
-red_ball_6.y = 271
 
 red_ball_7 = Ball() # fifth column, third row
 red_ball_7.colour = "Red"
-red_ball_7.x = 698
-red_ball_7.y = 299
 
 # player two's balls (blue)
 blue_ball_1 = Ball() # second column, second row
 blue_ball_1.colour = "Blue"
-blue_ball_1.x = 656
-blue_ball_1.y = 307
 
 blue_ball_2 = Ball()
 blue_ball_2.colour = "Blue"
-blue_ball_2.x = 670  # third column, first row
-blue_ball_2.y = 286
 
 blue_ball_3 = Ball() # fourth column, second row
 blue_ball_3.colour = "Blue"
-blue_ball_3.x = 684
-blue_ball_3.y = 292
 
 blue_ball_4 = Ball() # fourth column, fourth row
 blue_ball_4.colour = "Blue"
-blue_ball_4.x = 684
-blue_ball_4.y = 320
 
 blue_ball_5 = Ball() # fifth column, second row
 blue_ball_5.colour = "Blue"
-blue_ball_5.x = 698
-blue_ball_5.y = 285
 
 blue_ball_6 = Ball() # fifth column, fourth row
 blue_ball_6.colour = "Blue"
-blue_ball_6.x = 698
-blue_ball_6.y = 313
 
 blue_ball_7 = Ball() # fifth column, fifth row
 blue_ball_7.colour = "Blue"
-blue_ball_7.x = 698
-blue_ball_7.y = 327
+
+def reset_ball_variables():
+    ### reset common variables for every ball
+    for ball_instance in Ball:
+        ball_instance.pocketed = False
+        ball_instance.direction = 0
+        ball_instance.speed = 0
+        ball_instance.in_contact = False # temp?
+
+    ### reset inividual positions
+    cue_ball.x = 380 # exactly on the left third
+    cue_ball.y = 300
+    # temp values for testing:
+    eight_ball.x = 470
+    eight_ball.y = 300
+    #eight_ball.x = 670 # exactly on the right third x-value
+    #eight_ball.y = 300
+
+    red_ball_1.x = 642 
+    red_ball_1.y = 300
+
+    red_ball_2.x = 656
+    red_ball_2.y = 293
+
+    red_ball_3.x = 670
+    red_ball_3.y = 314
+
+    red_ball_4.x = 684
+    red_ball_4.y = 278
+
+    red_ball_5.x = 684
+    red_ball_5.y = 306
+
+    red_ball_6.x = 698
+    red_ball_6.y = 271
+
+    red_ball_7.x = 698
+    red_ball_7.y = 299
+
+    blue_ball_1.x = 656
+    blue_ball_1.y = 307
+
+    blue_ball_2.x = 670  # third column, first row
+    blue_ball_2.y = 286
+
+    blue_ball_3.x = 684
+    blue_ball_3.y = 292
+
+    blue_ball_4.x = 684
+    blue_ball_4.y = 320
+
+    blue_ball_5.x = 698
+    blue_ball_5.y = 285
+
+    blue_ball_6.x = 698
+    blue_ball_6.y = 313
+
+    blue_ball_7.x = 698
+    blue_ball_7.y = 327
+
+    ### reset ball colours
+    red_ball_1.colour = "Red"
+    red_ball_2.colour = "Red"
+    red_ball_3.colour = "Red"
+    red_ball_4.colour = "Red"
+    red_ball_5.colour = "Red"
+    red_ball_6.colour = "Red"
+    red_ball_7.colour = "Red"
+    
+    blue_ball_1.colour = "Blue"
+    blue_ball_2.colour = "Blue"
+    blue_ball_3.colour = "Blue"
+    blue_ball_4.colour = "Blue"
+    blue_ball_5.colour = "Blue"
+    blue_ball_6.colour = "Blue"
+    blue_ball_7.colour = "Blue"
+
+
+reset_ball_variables()  # original ball position at the start of the game
 
 ### Drawing Functions ###
 def draw_menu(game_in_progress, show_instructions):
@@ -401,10 +442,18 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
+
+    #for ball_increment in ball_x_increment:
+    #    ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
+    '''for ball_increment in range(int(ball_speed)):
+        ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
+        ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
+        print "hi"'''
+
     ball_x += ball_x_increment*ball_speed
     ball_y += ball_y_increment*ball_speed
     # gradually reduce the ball's speed due to gravity
-    ball_speed -= 0.095
+    ball_speed -= 0.075 #0.095
 
     ## Check if it gets pocketed
     ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
@@ -518,6 +567,7 @@ while not done:
     # Show the menu
     if game_in_progress == False:
         game_in_progress, show_instructions = draw_menu(game_in_progress, show_instructions)
+        reset_ball_variables()
     
     elif game_in_progress == True:       
         ### Drawing the playing area ###
@@ -551,8 +601,6 @@ while not done:
                     if cue_ball_dragged == True:
                             cue_ball.x = mouse_x
                             cue_ball.y = mouse_y
-
-
                 else:
                     # The amount the cue will move will depend on ...
                     # ... the distance between the current mouse ...
