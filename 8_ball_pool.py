@@ -1,9 +1,12 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
-        #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"
-    # Gameplay: "End game scenarios"..."
-    # Presentation: "Player names?"...
+        #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"..."Fix ball to wall collisions"
+
+       ################## below: write the text/info on the board? and keep it there for 5 secs/until the next shot? ###########
+    # sounds
+    # Gameplay: "End game scenarios"..."Expand on ball in hand scenarios - when the opponent doesn't touch their own ball"
+    # Presentation: "Which the players which player is which colour at the start"..."Say which player's turn it is on the scoreboard"
 # Name: Matthew Uy
 # Date: January 22, 2016
 # Assignment: CPT - "8 Ball Pool"
@@ -59,8 +62,8 @@ class Ball():
     def __init__(self):
         self._registry.append(self)
         self.colour = "unspecified"
-        self.x = 205
-        self.y = 200
+        self.x = 380
+        self.y = 300
         self.direction = 0 # angle is represented in degrees
         self.speed = 0
         self.pocketed = False
@@ -68,101 +71,139 @@ class Ball():
     
 # create an instance of each ball on the table
 cue_ball = Ball()
-cue_ball.x = 205 # exactly on the left third
-cue_ball.y = 200
+cue_ball.x = 380 # exactly on the left third
+cue_ball.y = 300
 
 eight_ball = Ball() # third column, second row
 # temp values for testing:
-eight_ball.x = 295
-eight_ball.y = 200
-#eight_ball.x = 495 # exactly on the right third x-value
-#eight_ball.y = 200
+eight_ball.x = 470
+eight_ball.y = 300
+#eight_ball.x = 670 # exactly on the right third x-value
+#eight_ball.y = 300
 
 # player one's balls (red)     # maybe make a function to make initializing the 16 balls a bit shorter
 red_ball_1 = Ball() # first column, first row
 red_ball_1.colour = "Red"
-red_ball_1.x = 467 
-red_ball_1.y = 200
+red_ball_1.x = 642 
+red_ball_1.y = 300
 
 red_ball_2 = Ball() # second column, first row
 red_ball_2.colour = "Red"
-red_ball_2.x = 481
-red_ball_2.y = 193
+red_ball_2.x = 656
+red_ball_2.y = 293
 
 red_ball_3 = Ball() # third column, third row
 red_ball_3.colour = "Red"
-red_ball_3.x = 495
-red_ball_3.y = 214
+red_ball_3.x = 670
+red_ball_3.y = 314
 
 red_ball_4 = Ball() # fourth column, first row
 red_ball_4.colour = "Red"
-red_ball_4.x = 509
-red_ball_4.y = 178
+red_ball_4.x = 684
+red_ball_4.y = 278
 
 red_ball_5 = Ball() # fourth column, third row
 red_ball_5.colour = "Red"
-red_ball_5.x = 509
-red_ball_5.y = 206
+red_ball_5.x = 684
+red_ball_5.y = 306
 
 red_ball_6 = Ball() # fifth column, first row
 red_ball_6.colour = "Red"
-red_ball_6.x = 523
-red_ball_6.y = 171
+red_ball_6.x = 698
+red_ball_6.y = 271
 
 red_ball_7 = Ball() # fifth column, third row
 red_ball_7.colour = "Red"
-red_ball_7.x = 523
-red_ball_7.y = 199
+red_ball_7.x = 698
+red_ball_7.y = 299
 
 # player two's balls (blue)
 blue_ball_1 = Ball() # second column, second row
 blue_ball_1.colour = "Blue"
-blue_ball_1.x = 481
-blue_ball_1.y = 207
+blue_ball_1.x = 656
+blue_ball_1.y = 307
 
 blue_ball_2 = Ball()
-blue_ball_2.x = 495  # third column, first row
 blue_ball_2.colour = "Blue"
-blue_ball_2.y = 186
+blue_ball_2.x = 670  # third column, first row
+blue_ball_2.y = 286
 
 blue_ball_3 = Ball() # fourth column, second row
 blue_ball_3.colour = "Blue"
-blue_ball_3.x = 509
-blue_ball_3.y = 192
+blue_ball_3.x = 684
+blue_ball_3.y = 292
 
 blue_ball_4 = Ball() # fourth column, fourth row
 blue_ball_4.colour = "Blue"
-blue_ball_4.x = 509
-blue_ball_4.y = 220
+blue_ball_4.x = 684
+blue_ball_4.y = 320
 
 blue_ball_5 = Ball() # fifth column, second row
 blue_ball_5.colour = "Blue"
-blue_ball_5.x = 523
-blue_ball_5.y = 185
+blue_ball_5.x = 698
+blue_ball_5.y = 285
 
 blue_ball_6 = Ball() # fifth column, fourth row
 blue_ball_6.colour = "Blue"
-blue_ball_6.x = 523
-blue_ball_6.y = 213
+blue_ball_6.x = 698
+blue_ball_6.y = 313
 
 blue_ball_7 = Ball() # fifth column, fifth row
 blue_ball_7.colour = "Blue"
-blue_ball_7.x = 523
-blue_ball_7.y = 227
+blue_ball_7.x = 698
+blue_ball_7.y = 327
 
 ### Drawing Functions ###
+def draw_menu(game_in_progress, show_instructions):
+    # get mouse position and click status
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    mouse_left = get_mouse_press()
+
+    if show_instructions == False:
+        # if mouse is hovering over a button, then highlight that button
+        if mouse_x > 410 and mouse_x < 595 and mouse_y > 295 and mouse_y < 350:     # start game
+            myimage = pygame.image.load("Images/menu_play.png")
+            if mouse_left == True:
+                game_in_progress = True
+                pygame.mouse.set_pos([100,200]) # set mouse to proper starting position
+        elif mouse_x > 410 and mouse_x < 595 and mouse_y > 365 and mouse_y < 420:   # show instructions
+            myimage = pygame.image.load("Images/menu_instructions.png")
+            if mouse_left == True:
+                show_instructions = True
+        elif mouse_x > 410 and mouse_x < 595 and mouse_y > 435 and mouse_y < 490:   # exit game
+            myimage = pygame.image.load("Images/menu_quit.png")
+            if mouse_left == True:
+                pygame.quit()
+        else:
+            myimage = pygame.image.load("Images/menu_unselected.png")
+    else: # show the instructions
+        if mouse_x > 30 and mouse_x < 240 and mouse_y > 30 and mouse_y < 90:     # start game
+            myimage = pygame.image.load("Images/instructions_selected.png")
+            if mouse_left == True:
+                show_instructions = False
+        else:
+            myimage = pygame.image.load("Images/instructions.png")
+        
+    # load and draw the menu
+    imagerect = myimage.get_rect()
+    screen.fill(BLACK)
+    screen.blit(myimage, imagerect)
+    pygame.display.flip()
+
+    return game_in_progress, show_instructions
+
 def draw_static_objects():
     # Draw the playing surface
-    pygame.draw.rect(screen, GREEN, [50, 50, 600, 300], 0)
+    pygame.draw.rect(screen, GREEN, [225, 150, 600, 300], 0)
     # Draw the border/ledge?
-    pygame.draw.rect(screen, BROWN, [50, 50, 600, 300], 20)
+    pygame.draw.rect(screen, BROWN, [225, 150, 600, 300], 20)
     # Draw the pockets
-    pygame.draw.circle(screen, BLACK, (60, 60), 12, 0)      # top left
-    pygame.draw.circle(screen, BLACK, (350, 60), 12, 0)     # top middle
-    pygame.draw.circle(screen, BLACK, (640, 60), 12, 0)     # top right
-    pygame.draw.circle(screen, BLACK, (60, 340), 12, 0)     # bottom left
-    pygame.draw.circle(screen, BLACK, (350, 340), 12, 0)    # bottom middle
-    pygame.draw.circle(screen, BLACK, (640, 340), 12, 0)    # bottom right
+    pygame.draw.circle(screen, BLACK, (235, 160), 12, 0)      # top left
+    pygame.draw.circle(screen, BLACK, (525, 160), 12, 0)     # top middle
+    pygame.draw.circle(screen, BLACK, (815, 160), 12, 0)     # top right
+    pygame.draw.circle(screen, BLACK, (235, 440), 12, 0)     # bottom left
+    pygame.draw.circle(screen, BLACK, (525, 440), 12, 0)    # bottom middle
+    pygame.draw.circle(screen, BLACK, (815, 440), 12, 0)    # bottom right
 
 def draw_scoreboard():
     num_of_red_left = 0
@@ -177,11 +218,11 @@ def draw_scoreboard():
                 
     # draw the red balls left
     for ball in range(num_of_red_left):
-        pygame.draw.circle(screen, RED, (100+ball*20, 20), 7, 0)
+        pygame.draw.circle(screen, RED, (275+ball*20, 120), 7, 0)
     
     # draw the blue balls left
     for ball in range(num_of_blue_left):
-        pygame.draw.circle(screen, BLUE, (500+ball*20, 20), 7, 0)
+        pygame.draw.circle(screen, BLUE, (675+ball*20, 120), 7, 0)
 
 def draw_balls():
     # draw the cue and eight balls
@@ -278,29 +319,28 @@ def convert_polar_coordinates_to_cartesian(x, y, angle, length):
     y += length * math.sin(math.radians(angle))
     return x, y
 
-
 def ball_to_cushion_collision(ball_direction, ball_x, ball_y):                
     # hit the top cushion
-    if ball_y < 72:
+    if ball_y < 172:
         if ball_direction > 270: # ball incoming from the left
             ball_direction = 360 - ball_direction
         else:                    # ball coming from the right
             ball_direction = 360 - ball_direction
             
     # hit the bottom cushion
-    if ball_y > 330:
+    if ball_y > 430:
         if ball_direction < 90: # ball incoming from the left
             ball_direction = 360 - ball_direction
         else:                   # ball coming from the right                  ### problem with all sides -> the ball sometimes sticks at very low angles of reflection -> double bounces?
             ball_direction = 360 - ball_direction
     # hit the left cushion
-    if ball_x < 72:
+    if ball_x < 245:
         if ball_direction > 180: # ball incoming from the bottom
             ball_direction += 90
         else:                   # ball coming from the top
             ball_direction -= 90
     # hit the right cushion
-    if ball_x > 630:
+    if ball_x > 805:
         if ball_direction > 180: # ball incoming from the bottom
             ball_direction -= 90
         else:                   # ball coming from the top     
@@ -332,23 +372,23 @@ def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
 def check_if_ball_pocketed(ball_x, ball_y):
     ball_pocketed = False # maght not be necessary, because it is assumed the only the unpocketed ball instances go through  'manage_ball_status()', and in turn, this function.
     # check the top left pocket
-    if ball_x > 50 and ball_x < 70 and ball_y > 60 and ball_y < 80:
+    if ball_x > 225 and ball_x < 245 and ball_y > 160 and ball_y < 180:
         # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
     # check the top middle pocket
-    elif ball_x > 350 and ball_x < 370 and ball_y > 60 and ball_y < 80:
+    elif ball_x > 525 and ball_x < 545 and ball_y > 160 and ball_y < 180:
         ball_pocketed = True
     # check the top right pocket
-    elif ball_x > 630 and ball_x < 650 and ball_y > 60 and ball_y < 80:
+    elif ball_x > 805 and ball_x < 825 and ball_y > 160 and ball_y < 180:
         ball_pocketed = True
     # check the bottom right pocket
-    elif ball_x > 630 and ball_x < 650 and ball_y > 320 and ball_y < 340:
+    elif ball_x > 805 and ball_x < 825 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
     # check the bottom middle pocket
-    elif ball_x > 350 and ball_x < 370 and ball_y > 320 and ball_y < 340:
+    elif ball_x > 565 and ball_x < 545 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
     # check the bottom left pocket
-    elif ball_x > 50 and ball_x < 70 and ball_y > 320 and ball_y < 340:
+    elif ball_x > 225 and ball_x < 245 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
         
     return ball_pocketed
@@ -386,13 +426,12 @@ def check_if_balls_moving():
 def ball_in_hand():
     # reset cue ball variables
     cue_ball.pocketed = False
-    cue_ball.x = 205
-    cue_ball.y = 200
+    cue_ball.x = 380
+    cue_ball.y = 300
     cue_ball.speed = 0
     cue_ball.direction = 0
     # reset mouse position
-    pygame.mouse.set_pos([100,200])
-
+    pygame.mouse.set_pos([275,300])
     
 def check_if_game_over(game_in_progress, current_player_turn):
     # check if escape key is pressed
@@ -401,6 +440,7 @@ def check_if_game_over(game_in_progress, current_player_turn):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 game_in_progress = False
+
 
     # check if black ball is pocketed
     if eight_ball.pocketed == True:
@@ -435,7 +475,6 @@ def check_if_game_over(game_in_progress, current_player_turn):
         
     return game_in_progress
 
-
 def determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot):
     # confirm that another shot has been made
     if previous_shot_count < current_shot_count:
@@ -453,15 +492,15 @@ def determine_player_turn(current_player_turn, current_shot_count, previous_shot
 
     # Draw an indicator, showing which player's turn it is
     if current_player_turn == "Red":
-        pygame.draw.rect(screen, RED, [338, 7, 25, 25], 0)
+        pygame.draw.rect(screen, RED, [513, 107, 25, 25], 0)
     elif current_player_turn == "Blue":
-        pygame.draw.rect(screen, BLUE, [338, 7, 25, 25], 0)
+        pygame.draw.rect(screen, BLUE, [513, 107, 25, 25], 0)
 
     return current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot
 
 pygame.init()
 # Set the width and height of the screen [width, height]
-size = (700, 400)
+size = (1050, 600)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("8 Ball Pool")
 # Loop until the user clicks the close button.
@@ -478,40 +517,7 @@ while not done:
 
     # Show the menu
     if game_in_progress == False:
-        # get mouse position and click status
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        mouse_left = get_mouse_press()
-
-        if show_instructions == False:
-            # if mouse is hovering over a button, then highlight that button
-            if mouse_x > 270 and mouse_x < 400 and mouse_y > 195 and mouse_y < 235:     # start game
-                myimage = pygame.image.load("Images/menu_play.png")
-                if mouse_left == True:
-                    game_in_progress = True
-                    pygame.mouse.set_pos([100,200]) # set mouse to proper starting position
-            elif mouse_x > 270 and mouse_x < 400 and mouse_y > 240 and mouse_y < 285:   # show instructions
-                myimage = pygame.image.load("Images/menu_instructions.png")
-                if mouse_left == True:
-                    show_instructions = True
-            elif mouse_x > 270 and mouse_x < 400 and mouse_y > 290 and mouse_y < 335:   # exit game
-                myimage = pygame.image.load("Images/menu_quit.png")
-                if mouse_left == True:
-                    pygame.quit()
-            else:
-                myimage = pygame.image.load("Images/menu_unselected.png")
-        else: # show the instructions
-            if mouse_x > 20 and mouse_x < 160 and mouse_y > 20 and mouse_y < 65:     # start game
-                myimage = pygame.image.load("Images/instructions_selected.png")
-                if mouse_left == True:
-                    show_instructions = False
-            else:
-                myimage = pygame.image.load("Images/instructions.png")
-        
-        # load and draw the menu
-        imagerect = myimage.get_rect()
-        screen.fill(BLACK)
-        screen.blit(myimage, imagerect)
-        pygame.display.flip()
+        game_in_progress, show_instructions = draw_menu(game_in_progress, show_instructions)
     
     elif game_in_progress == True:       
         ### Drawing the playing area ###
@@ -545,7 +551,6 @@ while not done:
                     if cue_ball_dragged == True:
                             cue_ball.x = mouse_x
                             cue_ball.y = mouse_y
-                            print "ball has been clicked while ball in hand"
 
 
                 else:
@@ -639,6 +644,7 @@ while not done:
         # switch player turn if necessary
         current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot)
     
+
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
  
