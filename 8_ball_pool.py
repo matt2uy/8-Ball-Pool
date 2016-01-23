@@ -1,7 +1,7 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
 # To do:
     # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
-        #..."maybe check the ball/wall collisions for every pixel of movement "..."ball guide line"..."Fix ball to wall collisions"
+        #..."Check for ball/wall collisions for every pixel of movement"..."ball guide line"..."Fix ball to wall collisions"
 
        ################## below: write the text/info on the board? and keep it there for 5 secs/until the next shot? ###########
     # sounds
@@ -182,7 +182,7 @@ def reset_ball_variables():
     red_ball_5.colour = "Red"
     red_ball_6.colour = "Red"
     red_ball_7.colour = "Red"
-    
+
     blue_ball_1.colour = "Blue"
     blue_ball_2.colour = "Blue"
     blue_ball_3.colour = "Blue"
@@ -206,7 +206,7 @@ def draw_menu(game_in_progress, show_instructions):
             myimage = pygame.image.load("Images/menu_play.png")
             if mouse_left == True:
                 game_in_progress = True
-                pygame.mouse.set_pos([100,200]) # set mouse to proper starting position
+                pygame.mouse.set_pos([250,300]) # set mouse to proper starting position
         elif mouse_x > 410 and mouse_x < 595 and mouse_y > 365 and mouse_y < 420:   # show instructions
             myimage = pygame.image.load("Images/menu_instructions.png")
             if mouse_left == True:
@@ -426,7 +426,7 @@ def check_if_ball_pocketed(ball_x, ball_y):
     elif ball_x > 805 and ball_x < 825 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
     # check the bottom middle pocket
-    elif ball_x > 565 and ball_x < 545 and ball_y > 420 and ball_y < 440:
+    elif ball_x > 525 and ball_x < 545 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
     # check the bottom left pocket
     elif ball_x > 225 and ball_x < 245 and ball_y > 420 and ball_y < 440:
@@ -443,15 +443,22 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
 
-    #for ball_increment in ball_x_increment:
-    #    ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
-    '''for ball_increment in range(int(ball_speed)):
-        ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
-        ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
-        print "hi"'''
+    #######################################################################################################################
+    # Check for ball/wall collisions for every pixel of movement
+    # try dividing by four at first...
+    #ball_x_increment /= 4
+    #ball_y_increment /= 4
+
 
     ball_x += ball_x_increment*ball_speed
     ball_y += ball_y_increment*ball_speed
+
+    '''for x in range(4):
+        ball_x += ball_x_increment*ball_speed
+        ball_y += ball_y_increment*ball_speed
+        ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
+        ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)'''
+
     # gradually reduce the ball's speed due to gravity
     ball_speed -= 0.075 #0.095
 
@@ -462,10 +469,14 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
 def check_if_balls_moving():
     no_movement_so_far = True # will be true if the balls were moving in the last frame
     for ball_instance in Ball:   
-        if ball_instance.speed <= 0 and no_movement_so_far == True:
+        if ball_instance.speed <= 0.01 and no_movement_so_far == True:
             no_movement_so_far = True
         else:
-            no_movement_so_far = False
+            if ball_instance.speed > 0.01:
+                print ball_instance.speed, ball_instance.colour, ball_instance.pocketed
+
+            if ball_instance.pocketed == False:
+                no_movement_so_far = False
                         
     if no_movement_so_far == True:
         return False
@@ -633,10 +644,10 @@ while not done:
                 mouse_held = False 
 
         # Balls are currently moving        
-        else:
+        else: 
             # update the all of the ball's variables
             for ball_instance in Ball:
-                if ball_instance.speed > 0 and ball_instance.pocketed == False:
+                if ball_instance.speed > 0.01 and ball_instance.pocketed == False:
                     # one function that does it all, for this ball
                     ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
                     # check and see if the player has pocketed the correct ball (and use this later to determine whether the player retains possesion for the next shot)
