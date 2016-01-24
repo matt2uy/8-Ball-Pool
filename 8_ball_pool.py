@@ -359,42 +359,46 @@ def convert_polar_coordinates_to_cartesian(x, y, angle, length):
     y += length * math.sin(math.radians(angle))
     return x, y
 
-def ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y):  
-    ball_hit_cushion = False              
-    # hit the top cushion
-    if ball_y < 172:
-        ball_hit_cushion = True
-        ball_direction = 360 - ball_direction
-            
-    # hit the bottom cushion
-    if ball_y > 430:
-        ball_hit_cushion = True
-        ball_direction = 360 - ball_direction
+def ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y, ball_in_contact):  
+    ball_hit_cushion = False  
 
-    # hit the left cushion
-    if ball_x < 245:
-        ball_hit_cushion = True
-        if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
-            ball_direction = 540 - ball_direction
-        elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
-            ball_direction = 180 - ball_direction
-        elif ball_direction == 180: # direct hit
-            ball_direction = 180
+    if ball_in_contact == False:            
+        # hit the top cushion
+        if ball_y < 172:
+            ball_hit_cushion = True
+            ball_direction = 360 - ball_direction
+                
+        # hit the bottom cushion
+        if ball_y > 430:
+            ball_hit_cushion = True
+            ball_direction = 360 - ball_direction
 
-    # hit the right cushion
-    if ball_x > 805:
-        ball_hit_cushion = True
-        if ball_direction > 270 and ball_direction < 360: # ball incoming from the bottom
-            ball_direction = 540- ball_direction
-        elif ball_direction > 0 and ball_direction < 90:                   # ball coming from the top 
-            ball_direction = 180 - ball_direction
-        elif ball_direction == 0: # direct hit
-            ball_direction = 0
+        # hit the left cushion
+        if ball_x < 245:
+            ball_hit_cushion = True
+            if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
+                ball_direction = 540 - ball_direction
+            elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
+                ball_direction = 180 - ball_direction
+            elif ball_direction == 180: # direct hit
+                ball_direction = 180
 
+        # hit the right cushion
+        if ball_x > 805:
+            ball_hit_cushion = True
+            if ball_direction > 270 and ball_direction < 360: # ball incoming from the bottom
+                ball_direction = 540- ball_direction
+            elif ball_direction > 0 and ball_direction < 90:                   # ball coming from the top 
+                ball_direction = 180 - ball_direction
+            elif ball_direction == 0: # direct hit
+                ball_direction = 0
+    else:
+        ball_in_contact = False
     # scrub off ball speed if it hit a cushion
     if ball_hit_cushion:
+        ball_in_contact = True
         ball_speed *= 0.95
-    return ball_direction, ball_speed
+    return ball_direction, ball_speed, ball_in_contact
 
 def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
     for ball_instance in Ball:
@@ -442,9 +446,9 @@ def check_if_ball_pocketed(ball_x, ball_y):
         
     return ball_pocketed
 
-def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed):
+def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed, ball_in_contact):
     # check for a ball to wall collision
-    ball_direction, ball_speed = ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y)
+    ball_direction, ball_speed, ball_in_contact = ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y, ball_in_contact)
     # check for a ball to ball collision
     ball_direction, ball_speed = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
     
@@ -459,7 +463,7 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
 
     ## Check if it gets pocketed
     ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
-    return ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
+    return ball_direction, ball_x, ball_y, ball_speed, ball_pocketed, ball_in_contact
 
 def check_if_balls_moving():
     no_movement_so_far = True # will be true if the balls were moving in the last frame
@@ -656,7 +660,7 @@ while not done:
             for ball_instance in Ball:
                 if ball_instance.speed > 0.01 and ball_instance.pocketed == False:
                     # one function that does it all, for this ball
-                    ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed)
+                    ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed, ball_instance.in_contact = manage_ball_status(ball_instance.direction, ball_instance.x, ball_instance.y, ball_instance.speed, ball_instance.pocketed, ball_instance.in_contact)
                     # check and see if the player has pocketed the correct ball (and use this later to determine whether the player retains possesion for the next shot)
                     if ball_instance.pocketed == True and ball_instance.colour == current_player_turn:
                         ball_pocketed_in_this_shot = True
