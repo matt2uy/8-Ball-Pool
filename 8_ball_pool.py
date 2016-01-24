@@ -16,6 +16,7 @@ import pygame, math
 
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
+DARK_BROWN = (110, 74, 55)   # pool table border
 green_r = 51
 green_g =  163
 green_b = 47
@@ -46,8 +47,11 @@ show_instructions = False # a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
 cue_end_x = 0
 cue_end_y = 0
+cue_end_point_x = 0
+cue_end_point_y = 0
 cue_buffer = 0
 balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
+
 
 # this class allows the ball class to be iterable (which I use later in a few functions).
 # Got this tip from: http://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
@@ -127,10 +131,10 @@ def reset_ball_variables():
     cue_ball.x = 380 # exactly on the left third
     cue_ball.y = 300
     # temp values for testing:
-    eight_ball.x = 470
-    eight_ball.y = 300
-    #eight_ball.x = 670 # exactly on the right third x-value
+    #eight_ball.x = 470
     #eight_ball.y = 300
+    eight_ball.x = 670 # exactly on the right third x-value
+    eight_ball.y = 300
 
     red_ball_1.x = 642 
     red_ball_1.y = 300
@@ -191,7 +195,6 @@ def reset_ball_variables():
     blue_ball_6.colour = "Blue"
     blue_ball_7.colour = "Blue"
 
-
 reset_ball_variables()  # original ball position at the start of the game
 
 ### Drawing Functions ###
@@ -236,8 +239,8 @@ def draw_menu(game_in_progress, show_instructions):
 def draw_static_objects():
     # Draw the playing surface
     pygame.draw.rect(screen, GREEN, [225, 150, 600, 300], 0)
-    # Draw the border/ledge?
-    pygame.draw.rect(screen, BROWN, [225, 150, 600, 300], 20)
+    # Draw the pool table border
+    pygame.draw.rect(screen, DARK_BROWN, [225, 150, 600, 300], 20)
     # Draw the pockets
     pygame.draw.circle(screen, BLACK, (235, 160), 12, 0)      # top left
     pygame.draw.circle(screen, BLACK, (525, 160), 12, 0)     # top middle
@@ -374,18 +377,41 @@ def ball_to_cushion_collision(ball_direction, ball_x, ball_y):
             ball_direction = 360 - ball_direction
         else:                   # ball coming from the right                  ### problem with all sides -> the ball sometimes sticks at very low angles of reflection -> double bounces?
             ball_direction = 360 - ball_direction
-    # hit the left cushion
+    '''# hit the left cushion
     if ball_x < 245:
-        if ball_direction > 180: # ball incoming from the bottom
-            ball_direction += 90
-        else:                   # ball coming from the top
-            ball_direction -= 90
+            if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
+                ball_direction = 180 - ball_direction
+            elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
+                ball_direction = 540 - ball_direction
+            elif ball_direction == 180: # direct hit
+                ball_direction = 180
+
     # hit the right cushion
     if ball_x > 805:
-        if ball_direction > 180: # ball incoming from the bottom
-            ball_direction -= 90
-        else:                   # ball coming from the top     
-            ball_direction += 90
+        if ball_direction > 270 and ball_direction < 360: # ball incoming from the bottom
+            ball_direction = 180 - ball_direction
+        elif ball_direction > 0 and ball_direction < 90:                   # ball coming from the top 
+            ball_direction = 540 - ball_direction
+        elif ball_direction == 0: # direct hit
+            ball_direction = 0
+    return ball_direction'''
+    # hit the left cushion
+    if ball_x < 245:
+            if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
+                ball_direction = 540 - ball_direction
+            elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
+                ball_direction = 180 - ball_direction
+            elif ball_direction == 180: # direct hit
+                ball_direction = 180
+
+    # hit the right cushion
+    if ball_x > 805:
+        if ball_direction > 270 and ball_direction < 360: # ball incoming from the bottom
+            ball_direction = 540- ball_direction
+        elif ball_direction > 0 and ball_direction < 90:                   # ball coming from the top 
+            ball_direction = 180 - ball_direction
+        elif ball_direction == 0: # direct hit
+            ball_direction = 0
     return ball_direction
 
 def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
@@ -493,6 +519,12 @@ def ball_in_hand():
     # reset mouse position
     pygame.mouse.set_pos([275,300])
     
+def determine_guideline(cue_end_point_x, cue_end_point_y, cue_front_x, cue_front_y, mouse_degs):
+    cue_end_point_x, cue_end_point_y = convert_polar_coordinates_to_cartesian(cue_end_point_x, cue_end_point_y, mouse_degs, 100000)
+    print cue_end_point_x, "   ", cue_end_point_y
+    #cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
+    return cue_end_point_x, cue_end_point_y    
+
 def check_if_game_over(game_in_progress, current_player_turn):
     # check if escape key is pressed
     events = pygame.event.get()
@@ -694,7 +726,12 @@ while not done:
 
         # show the cue when the balls have stopped moving
         if balls_in_movement == False:
+            # draw the cue
             pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
+            # draw the guideline
+            cue_end_point_x, cue_end_point_y = determine_guideline(cue_end_point_x, cue_end_point_y, cue_front_x, cue_front_y, mouse_degs)
+            #pygame.draw.line(screen, WHITE, (cue_ball.x, cue_ball.y), (cue_end_point_x, cue_end_point_y), 1)
+
 
         ### Game end and player turns ###
         # if the game seems to be done...
@@ -702,7 +739,6 @@ while not done:
 
         # switch player turn if necessary
         current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot)
-    
 
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
