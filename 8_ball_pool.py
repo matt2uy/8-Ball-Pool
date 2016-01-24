@@ -246,10 +246,10 @@ def draw_static_objects():
     pygame.draw.rect(screen, DARK_BROWN, [225, 150, 600, 300], 20)
     # Draw the pockets
     pygame.draw.circle(screen, BLACK, (235, 160), 12, 0)      # top left
-    pygame.draw.circle(screen, BLACK, (525, 160), 12, 0)     # top middle
+    pygame.draw.circle(screen, BLACK, (525, 160), 10, 0)     # top middle
     pygame.draw.circle(screen, BLACK, (815, 160), 12, 0)     # top right
     pygame.draw.circle(screen, BLACK, (235, 440), 12, 0)     # bottom left
-    pygame.draw.circle(screen, BLACK, (525, 440), 12, 0)    # bottom middle
+    pygame.draw.circle(screen, BLACK, (525, 440), 10, 0)    # bottom middle
     pygame.draw.circle(screen, BLACK, (815, 440), 12, 0)    # bottom right
 
 def draw_scoreboard():
@@ -398,6 +398,7 @@ def ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y, ball_i
         if ball_y > 430:
             ball_hit_cushion = True
             ball_direction = 360 - ball_direction
+            print "hit bottom"
 
         # hit the left cushion
         if ball_x < 245:
@@ -420,10 +421,6 @@ def ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y, ball_i
                 ball_direction = 0
     else:
         ball_in_contact = False
-    # scrub off ball speed if it hit a cushion
-    if ball_hit_cushion:
-        ball_in_contact = True
-        ball_speed *= 0.95
     return ball_direction, ball_speed, ball_in_contact
 
 def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
@@ -455,7 +452,7 @@ def check_if_ball_pocketed(ball_x, ball_y):
         # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
     # check the top middle pocket
-    elif ball_x > 525 and ball_x < 545 and ball_y > 160 and ball_y < 180:
+    elif ball_x > 525 and ball_x < 545 and ball_y > 160 and ball_y < 172:
         ball_pocketed = True
     # check the top right pocket
     elif ball_x > 805 and ball_x < 825 and ball_y > 160 and ball_y < 180:
@@ -464,7 +461,7 @@ def check_if_ball_pocketed(ball_x, ball_y):
     elif ball_x > 805 and ball_x < 825 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
     # check the bottom middle pocket
-    elif ball_x > 525 and ball_x < 545 and ball_y > 420 and ball_y < 440:
+    elif ball_x > 525 and ball_x < 545 and ball_y > 430 and ball_y < 440:
         ball_pocketed = True
     # check the bottom left pocket
     elif ball_x > 225 and ball_x < 245 and ball_y > 420 and ball_y < 440:
