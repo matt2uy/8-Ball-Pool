@@ -1,8 +1,4 @@
 # Source code for this project can also be found in the github repository: https://github.com/matt2uy/8-Ball-Pool
-# To do:
-    # sounds
-    # diamonds on the pool table edges
-    # Gameplay: "refine ball guide line"
 # Name: Matthew Uy
 # Date: January 22, 2016
 # Assignment: CPT - "8 Ball Pool"
@@ -488,7 +484,7 @@ def check_if_ball_pocketed(ball_x, ball_y):
         # check to see if the ball is touches a 20x20 px zone ## may need to keep in mind that the x and y values of a ball may be at the top right of the sprite.
         ball_pocketed = True
     # check the top middle pocket
-    elif ball_x > 525 and ball_x < 545 and ball_y > 160 and ball_y < 172:
+    elif ball_x > 525 and ball_x < 545 and ball_y > 150 and ball_y < 175:
         ball_pocketed = True
     # check the top right pocket
     elif ball_x > 805 and ball_x < 825 and ball_y > 160 and ball_y < 180:
@@ -497,7 +493,7 @@ def check_if_ball_pocketed(ball_x, ball_y):
     elif ball_x > 805 and ball_x < 825 and ball_y > 420 and ball_y < 440:
         ball_pocketed = True
     # check the bottom middle pocket
-    elif ball_x > 525 and ball_x < 545 and ball_y > 430 and ball_y < 440:
+    elif ball_x > 525 and ball_x < 545 and ball_y > 425 and ball_y < 450:
         ball_pocketed = True
     # check the bottom left pocket
     elif ball_x > 225 and ball_x < 245 and ball_y > 420 and ball_y < 440:
@@ -705,6 +701,8 @@ while not done:
                     if cue_ball_in_hand:
                         cue_ball_in_hand = False
                         cue_ball_dragged = False
+                        current_shot_count -= 1
+
                     current_shot_count += 1
                     cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
                     # set the cue ball variables and set the balls_in_movement variable in motion
