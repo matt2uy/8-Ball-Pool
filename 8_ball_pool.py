@@ -2,7 +2,7 @@
 # To do:
     # sounds
     # diamonds on the pool table edges
-    # Gameplay: "refine ball guide line"..."End game scenarios"
+    # Gameplay: "refine ball guide line"
 # Name: Matthew Uy
 # Date: January 22, 2016
 # Assignment: CPT - "8 Ball Pool"
@@ -36,6 +36,9 @@ ball_in_hand_message = 0
 
 ### Game variables ###
 game_in_progress = False
+winner = "unknown"
+win_screen = False # determine whether to show the win screen or not
+
 # variables used in determine_player_turn(), to find out which player is currently controlling the cue
 current_player_turn = "Red"
 current_shot_count = 0
@@ -44,12 +47,12 @@ ball_pocketed_in_this_shot = False
 # ball in hand variables
 cue_ball_in_hand = False
 cue_ball_dragged = False
+mouse_distance_travelled = 0
 
 show_instructions = False # a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
 cue_buffer = 0
 balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
-
 
 # this class allows the ball class to be iterable (which I use later in a few functions).
 # Got this tip from: http://stackoverflow.com/questions/739882/iterating-over-object-instances-of-a-given-class-in-python
@@ -229,6 +232,7 @@ def draw_menu(game_in_progress, show_instructions):
         else:
             myimage = pygame.image.load("Images/instructions.png")
         
+
     # load and draw the menu
     imagerect = myimage.get_rect()
     screen.fill(BLACK)
@@ -236,6 +240,36 @@ def draw_menu(game_in_progress, show_instructions):
     pygame.display.flip()
 
     return game_in_progress, show_instructions
+
+def draw_win_screen(win_screen, winner):
+    image_selected = "Images/blue_win_selected.png"
+    image = "Images/blue_win.png"
+    if winner == "Blue":
+        image_selected = "Images/blue_win_selected.png"
+        image = "Images/blue_win.png"
+    elif winner == "Red":
+        image_selected = "Images/red_win_selected.png"
+        image = "Images/red_win.png"
+
+    # get mouse position and click status
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    mouse_left = get_mouse_press()
+
+    # if mouse is hovering over a button, then highlight that button
+    if mouse_x > 380 and mouse_x < 630 and mouse_y > 295 and mouse_y < 410:
+        myimage = pygame.image.load(image_selected)
+        if mouse_left == True:
+            win_screen = False # go to main menu
+    else:
+        myimage = pygame.image.load(image)
+
+
+    imagerect = myimage.get_rect()
+    screen.fill(BLACK)
+    screen.blit(myimage, imagerect)
+    pygame.display.flip()
+
+    return win_screen
 
 def draw_static_objects():
     # Draw the playing surface
@@ -530,13 +564,13 @@ def determine_guideline(cue_end_point_x, cue_end_point_y, cue_front_x, cue_front
     return cue_end_point_x, cue_end_point_y    
 
 def check_if_game_over(game_in_progress, current_player_turn):
+    winner = "unknown"
     # check if escape key is pressed
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 game_in_progress = False
-
 
     # check if black ball is pocketed
     if eight_ball.pocketed == True:
@@ -564,12 +598,7 @@ def check_if_game_over(game_in_progress, current_player_turn):
                 winner = "Red"
             else:
                 winner = "Blue"
-
-        # print "game over" message, plus the player who won
-        print "game over"
-        print winner, "wins"
-        
-    return game_in_progress
+    return game_in_progress, winner
 
 def determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot):
     # confirm that another shot has been made
@@ -602,12 +631,20 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-
+        
     # Show the menu
-    if game_in_progress == False:
-        game_in_progress, show_instructions = draw_menu(game_in_progress, show_instructions)
+    if game_in_progress == False:  
+        if win_screen == True:
+            win_screen = draw_win_screen(win_screen, winner)
+        
+        else:
+            win_screen = False
+            game_in_progress = False
+            winner = "unknown"  
+            game_in_progress, show_instructions = draw_menu(game_in_progress, show_instructions)  
+
         reset_ball_variables()
-    
+
     elif game_in_progress == True:       
         ### Drawing the playing area ###
         screen.fill(BLACK) # background
@@ -741,8 +778,10 @@ while not done:
             pygame.draw.line(screen, WHITE, (cue_ball.x, cue_ball.y), (cue_end_point_x, cue_end_point_y), 1)
 
         ### Game end and player turns ###
-        # if the game seems to be done...
-        game_in_progress = check_if_game_over(game_in_progress, current_player_turn)
+        # if the game seems to be done -> show winner -> then return to main menu
+        game_in_progress, winner = check_if_game_over(game_in_progress, current_player_turn)
+        if game_in_progress == False:
+            win_screen = True
 
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
