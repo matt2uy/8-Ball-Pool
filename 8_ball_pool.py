@@ -1,10 +1,8 @@
-# Github repository: https://github.com/matt2uy/8-Ball-Pool
+# Source code for this project can also be found in the github repository: https://github.com/matt2uy/8-Ball-Pool
 # To do:
-    # below: write the text/info on the board? and keep it there for 5 secs/until the next shot? ###########
     # sounds
     # diamonds on the pool table edges
-    # Gameplay: "refine ball guide line"..."fix player turns"..."End game scenarios"..."Expand on ball in hand scenarios - when the opponent doesn't touch their own ball"
-    # Presentation: "Which the players which player is which colour at the start"..."Say which player's turn it is on the scoreboard"
+    # Gameplay: "refine ball guide line"..."End game scenarios"
 # Name: Matthew Uy
 # Date: January 22, 2016
 # Assignment: CPT - "8 Ball Pool"
@@ -252,7 +250,7 @@ def draw_static_objects():
     pygame.draw.circle(screen, BLACK, (525, 440), 10, 0)    # bottom middle
     pygame.draw.circle(screen, BLACK, (815, 440), 12, 0)    # bottom right
 
-def draw_scoreboard():
+def draw_scoreboard(current_player_turn):
     num_of_red_left = 0
     num_of_blue_left = 0
     # get the number of red and blue balls
@@ -271,7 +269,12 @@ def draw_scoreboard():
     for ball in range(num_of_blue_left):
         pygame.draw.circle(screen, BLUE, (675+ball*20, 120), 7, 0)
 
+    # Draw an indicator, showing which player's turn it is
     draw_text("Current Player:", 433, 107, GREY, 20)
+    if current_player_turn == "Red":
+        pygame.draw.rect(screen, RED, [593, 107, 25, 25], 0)
+    elif current_player_turn == "Blue":
+        pygame.draw.rect(screen, BLUE, [593, 107, 25, 25], 0)
 
 def draw_balls():
     # draw the cue and eight balls
@@ -398,7 +401,6 @@ def ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y, ball_i
         if ball_y > 430:
             ball_hit_cushion = True
             ball_direction = 360 - ball_direction
-            print "hit bottom"
 
         # hit the left cushion
         if ball_x < 245:
@@ -573,7 +575,6 @@ def determine_player_turn(current_player_turn, current_shot_count, previous_shot
     # confirm that another shot has been made
     if previous_shot_count < current_shot_count:
         previous_shot_count += 1
-
         if ball_pocketed_in_this_shot == False or cue_ball.pocketed == True:            
             # toggle player turn if a ball hasn't been pocketed in this turn
             if current_player_turn == "Red":
@@ -581,14 +582,7 @@ def determine_player_turn(current_player_turn, current_shot_count, previous_shot
             elif current_player_turn == "Blue":
                 current_player_turn = "Red"
         else:
-            print "ball has been sunk, don't change player turn" # need to test out this print line check later
             ball_pocketed_in_this_shot = False # reset the ball pocketed count (for the current shot)
-
-    # Draw an indicator, showing which player's turn it is
-    if current_player_turn == "Red":
-        pygame.draw.rect(screen, RED, [593, 107, 25, 25], 0)
-    elif current_player_turn == "Blue":
-        pygame.draw.rect(screen, BLUE, [593, 107, 25, 25], 0)
 
     return current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot
 
@@ -618,7 +612,7 @@ while not done:
         ### Drawing the playing area ###
         screen.fill(BLACK) # background
         draw_static_objects()
-        draw_scoreboard()
+        draw_scoreboard(current_player_turn)
         draw_balls()
 
         # draw in-game messages
@@ -665,21 +659,21 @@ while not done:
                     # change the amount of power/ball speed it will transfer
                     # ... depending of the distance between the cue and the cue ball
                     cue_ball.speed = mouse_distance_travelled/7
-
-
                 
-            # mouse is released AFTER being clicked at first (previous elif statement)
+            # mouse is released AFTER being clicked at first
             elif mouse_left == False and mouse_held == True:
-                # if the ball is in hand, "remove" in from that hand...
-                if cue_ball_in_hand:
-                    cue_ball_in_hand = False
-                    cue_ball_dragged = False
-                current_shot_count += 1
-                cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
-                # set the cue ball variables and set the balls_in_movement variable in motion
-                cue_ball.direction = mouse_degs
-                balls_in_movement = True
-                mouse_held = False 
+                # ensure that there are no false positive (ex. if the user clicks and releases the cue without dragging it)
+                if mouse_distance_travelled > 5:
+                    # if the ball is in hand, "remove" in from that hand...
+                    if cue_ball_in_hand:
+                        cue_ball_in_hand = False
+                        cue_ball_dragged = False
+                    current_shot_count += 1
+                    cue_buffer = 0  # reset the cue buffer (the amount the cue moved while the mouse was being held)
+                    # set the cue ball variables and set the balls_in_movement variable in motion
+                    cue_ball.direction = mouse_degs
+                    balls_in_movement = True
+                    mouse_held = False 
 
         # Balls are currently moving        
         else: 
@@ -698,7 +692,6 @@ while not done:
         ### Updating the cue's position and drawing it ###
         # Ball is currently in the opponents hand...until the next shot is made
         if cue_ball.pocketed:
-            print "pocketed"
             cue_ball_in_hand = True
             # if the balls have stopped moving -> reset ball variable (should be a one time thing)
             if balls_in_movement == False:   
@@ -716,6 +709,9 @@ while not done:
 
         # show the cue when the balls have stopped moving
         if balls_in_movement == False:
+            # switch player turn if necessary
+            current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot)
+
             # Get the angle between the mouse and the cue ball
             mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
             
@@ -744,13 +740,9 @@ while not done:
             # draw the guideline
             pygame.draw.line(screen, WHITE, (cue_ball.x, cue_ball.y), (cue_end_point_x, cue_end_point_y), 1)
 
-
         ### Game end and player turns ###
         # if the game seems to be done...
         game_in_progress = check_if_game_over(game_in_progress, current_player_turn)
-
-        # switch player turn if necessary
-        current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot = determine_player_turn(current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot)
 
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
