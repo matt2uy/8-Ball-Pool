@@ -1,11 +1,9 @@
 # Github repository: https://github.com/matt2uy/8-Ball-Pool
 # To do:
-    # Physics: "Fixed angle of the cue ball after impact"..."Fixed ball collisions bug (check out the '.in contact; variable"
-        #..."Check for ball/wall collisions for every pixel of movement"..."ball guide line"..."Fix ball to wall collisions"
-
-       ################## below: write the text/info on the board? and keep it there for 5 secs/until the next shot? ###########
+    # below: write the text/info on the board? and keep it there for 5 secs/until the next shot? ###########
     # sounds
-    # Gameplay: "End game scenarios"..."Expand on ball in hand scenarios - when the opponent doesn't touch their own ball"
+    # diamonds on the pool table edges
+    # Gameplay: "refine ball guide line"..."fix player turns"..."End game scenarios"..."Expand on ball in hand scenarios - when the opponent doesn't touch their own ball"
     # Presentation: "Which the players which player is which colour at the start"..."Say which player's turn it is on the scoreboard"
 # Name: Matthew Uy
 # Date: January 22, 2016
@@ -40,15 +38,10 @@ previous_shot_count = 0
 ball_pocketed_in_this_shot = False
 # ball in hand variables
 cue_ball_in_hand = False
-cue_ball_opacity = 100
 cue_ball_dragged = False
 
 show_instructions = False # a variable for the menu
 mouse_held = False   # if the mouse is currently holding the cue
-cue_end_x = 0
-cue_end_y = 0
-cue_end_point_x = 0
-cue_end_point_y = 0
 cue_buffer = 0
 balls_in_movement = False # balls are undergoing movement, means that the cue can't be moved at this time
 
@@ -76,9 +69,12 @@ class Ball():
     
 # create an instance of each ball on the table
 cue_ball = Ball()
+cue_ball.colour = "White"
 eight_ball = Ball() # third column, second row
+eight_ball.colour = "Black"
 # player one's balls (red)     # maybe make a function to make initializing the 16 balls a bit shorter
 red_ball_1 = Ball() # first column, first row
+red_ball_1.colour = "Red"
 red_ball_2 = Ball() # second column, first row
 red_ball_2.colour = "Red"
 
@@ -311,11 +307,11 @@ def pulse_cue_ball(white_r, white_g, white_b, ball_pulse_multiplier, WHITE):
         # if the ball is in hand -> make it flash
         # set the cue ball drawing to a fade in/out animation
         if ball_in_hand:
-            white_r += 8*ball_pulse_multiplier
-            white_g += 5*ball_pulse_multiplier
-            white_b += 6*ball_pulse_multiplier
+            white_r += 4*ball_pulse_multiplier
+            white_g += 2*ball_pulse_multiplier
+            white_b += 3*ball_pulse_multiplier
             # determine whether the ball pulses 'towaards' or 'against' green or white
-            if white_g < green_g or white_g > 253: # 255 is the maximum rgb value, it is set to 250 to stay safe because white_r increments by 8
+            if white_g < green_g or white_g > 254: # 255 is the maximum rgb value, it is set to 250 to stay safe because white_r increments by 8
                 ball_pulse_multiplier *= -1
 
         else:
@@ -363,56 +359,42 @@ def convert_polar_coordinates_to_cartesian(x, y, angle, length):
     y += length * math.sin(math.radians(angle))
     return x, y
 
-def ball_to_cushion_collision(ball_direction, ball_x, ball_y):                
+def ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y):  
+    ball_hit_cushion = False              
     # hit the top cushion
     if ball_y < 172:
-        if ball_direction > 270: # ball incoming from the left
-            ball_direction = 360 - ball_direction
-        else:                    # ball coming from the right
-            ball_direction = 360 - ball_direction
+        ball_hit_cushion = True
+        ball_direction = 360 - ball_direction
             
     # hit the bottom cushion
     if ball_y > 430:
-        if ball_direction < 90: # ball incoming from the left
-            ball_direction = 360 - ball_direction
-        else:                   # ball coming from the right                  ### problem with all sides -> the ball sometimes sticks at very low angles of reflection -> double bounces?
-            ball_direction = 360 - ball_direction
-    '''# hit the left cushion
-    if ball_x < 245:
-            if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
-                ball_direction = 180 - ball_direction
-            elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
-                ball_direction = 540 - ball_direction
-            elif ball_direction == 180: # direct hit
-                ball_direction = 180
+        ball_hit_cushion = True
+        ball_direction = 360 - ball_direction
 
-    # hit the right cushion
-    if ball_x > 805:
-        if ball_direction > 270 and ball_direction < 360: # ball incoming from the bottom
-            ball_direction = 180 - ball_direction
-        elif ball_direction > 0 and ball_direction < 90:                   # ball coming from the top 
-            ball_direction = 540 - ball_direction
-        elif ball_direction == 0: # direct hit
-            ball_direction = 0
-    return ball_direction'''
     # hit the left cushion
     if ball_x < 245:
-            if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
-                ball_direction = 540 - ball_direction
-            elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
-                ball_direction = 180 - ball_direction
-            elif ball_direction == 180: # direct hit
-                ball_direction = 180
+        ball_hit_cushion = True
+        if ball_direction > 180 and ball_direction < 270: # ball incoming from the bottom
+            ball_direction = 540 - ball_direction
+        elif ball_direction > 90 and ball_direction < 180:                   # ball coming from the top
+            ball_direction = 180 - ball_direction
+        elif ball_direction == 180: # direct hit
+            ball_direction = 180
 
     # hit the right cushion
     if ball_x > 805:
+        ball_hit_cushion = True
         if ball_direction > 270 and ball_direction < 360: # ball incoming from the bottom
             ball_direction = 540- ball_direction
         elif ball_direction > 0 and ball_direction < 90:                   # ball coming from the top 
             ball_direction = 180 - ball_direction
         elif ball_direction == 0: # direct hit
             ball_direction = 0
-    return ball_direction
+
+    # scrub off ball speed if it hit a cushion
+    if ball_hit_cushion:
+        ball_speed *= 0.95
+    return ball_direction, ball_speed
 
 def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
     for ball_instance in Ball:
@@ -421,11 +403,11 @@ def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
             # check if the cue ball is touching/contacts the eight ball
             if ball_x > ball_instance.x-7 and ball_x < ball_instance.x+14: # check the x-axis
                 if ball_y > ball_instance.y-14 and ball_y < ball_instance.y+14: # check the y-axis
-                    # now it is confirmed that they are touching, or are in contact
+                    # now it is confirmed that they are in contact
                     if ball_instance.in_contact == False: # make sure it doesn't do the below twice, for only one contact
                         ball_instance.direction = get_angle(ball_instance.x, ball_instance.y, ball_x, ball_y)
-                        ball_instance.speed = ball_speed*0.75
-                        ball_speed *= 0.75
+                        ball_instance.speed = ball_speed*0.95#0.75
+                        ball_speed *= 0.90#0.75
                             
                         ball_instance.in_contact = True
                 else: # passed one test but is ultimately not in contact
@@ -434,7 +416,7 @@ def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
             else: # not in contact
                 if ball_instance.in_contact == True:
                         ball_instance.in_contact = False
-    return ball_speed, ball_direction
+    return ball_direction, ball_speed
 
 def check_if_ball_pocketed(ball_x, ball_y):
     ball_pocketed = False # maght not be necessary, because it is assumed the only the unpocketed ball instances go through  'manage_ball_status()', and in turn, this function.
@@ -462,31 +444,18 @@ def check_if_ball_pocketed(ball_x, ball_y):
 
 def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed):
     # check for a ball to wall collision
-    ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
+    ball_direction, ball_speed = ball_to_cushion_collision(ball_direction, ball_speed, ball_x, ball_y)
     # check for a ball to ball collision
-    ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
+    ball_direction, ball_speed = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)
     
     ### change the ball's cartesian value based on its direction and speed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
 
-    #######################################################################################################################
-    # Check for ball/wall collisions for every pixel of movement
-    # try dividing by four at first...
-    #ball_x_increment /= 4
-    #ball_y_increment /= 4
 
-
-    ball_x += ball_x_increment*ball_speed
-    ball_y += ball_y_increment*ball_speed
-
-    '''for x in range(4):
-        ball_x += ball_x_increment*ball_speed
-        ball_y += ball_y_increment*ball_speed
-        ball_direction = ball_to_cushion_collision(ball_direction, ball_x, ball_y)
-        ball_speed, ball_direction = ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y)'''
-
+    ball_x += ball_x_increment*ball_speed/3
+    ball_y += ball_y_increment*ball_speed/3
     # gradually reduce the ball's speed due to gravity
-    ball_speed -= 0.075 #0.095
+    ball_speed -= 0.023 #0.095
 
     ## Check if it gets pocketed
     ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
@@ -498,9 +467,6 @@ def check_if_balls_moving():
         if ball_instance.speed <= 0.01 and no_movement_so_far == True:
             no_movement_so_far = True
         else:
-            if ball_instance.speed > 0.01:
-                print ball_instance.speed, ball_instance.colour, ball_instance.pocketed
-
             if ball_instance.pocketed == False:
                 no_movement_so_far = False
                         
@@ -520,9 +486,18 @@ def ball_in_hand():
     pygame.mouse.set_pos([275,300])
     
 def determine_guideline(cue_end_point_x, cue_end_point_y, cue_front_x, cue_front_y, mouse_degs):
-    cue_end_point_x, cue_end_point_y = convert_polar_coordinates_to_cartesian(cue_end_point_x, cue_end_point_y, mouse_degs, 100000)
-    print cue_end_point_x, "   ", cue_end_point_y
-    #cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
+    guideline_length = 0
+    object_touched = False
+
+    # limit to cushions
+    while object_touched == False:
+        cue_end_point_x, cue_end_point_y = convert_polar_coordinates_to_cartesian(cue_end_point_x, cue_end_point_y, mouse_degs, guideline_length)
+        if cue_end_point_x < 245 or cue_end_point_x > 805 or cue_end_point_y < 172 or cue_end_point_y > 430:
+            object_touched = True
+        else:
+            guideline_length += 1
+
+
     return cue_end_point_x, cue_end_point_y    
 
 def check_if_game_over(game_in_progress, current_player_turn):
@@ -705,32 +680,36 @@ while not done:
             # reset the white colour values
             WHITE = (255, 255, 255) # cue ball            # duplicate?
         
-        # Get the angle between the mouse and the cue ball
-        mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
-        
-        cue_front_x = mouse_x
-        cue_back_x = mouse_x
-        cue_front_y = mouse_y
-        cue_back_y = mouse_y
-
-        # Get the length of the cue)
-        mouse_to_ball_length = get_distance(cue_ball.x, cue_ball.y, cue_front_x, cue_front_y)
-        
-        # limit the length of the cue
-        cue_length = mouse_to_ball_length-200-cue_buffer
-        ball_to_cue_distance = mouse_to_ball_length-20-cue_buffer
-        
-        # get two pairs of the cue's coordinates from their polar coordinates (mouse angle + distance from the cue ball)
-        cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
-        cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
 
         # show the cue when the balls have stopped moving
         if balls_in_movement == False:
+            # Get the angle between the mouse and the cue ball
+            mouse_degs = get_angle(cue_ball.x, cue_ball.y, mouse_x, mouse_y)
+            
+            cue_front_x = mouse_x
+            cue_back_x = mouse_x
+            cue_front_y = mouse_y
+            cue_back_y = mouse_y
+
+            # Get the length of the cue
+            mouse_to_ball_length = get_distance(cue_ball.x, cue_ball.y, cue_front_x, cue_front_y)
+            
+            # limit the length of the cue
+            cue_length = mouse_to_ball_length-200-cue_buffer
+            ball_to_cue_distance = mouse_to_ball_length-20-cue_buffer
+            
+            # get two pairs of the cue's coordinates from their polar coordinates (mouse angle + distance from the cue ball)
+            cue_front_x, cue_front_y = convert_polar_coordinates_to_cartesian(cue_front_x, cue_front_y, mouse_degs, cue_length)
+            cue_back_x, cue_back_y = convert_polar_coordinates_to_cartesian(cue_back_x, cue_back_y, mouse_degs, ball_to_cue_distance)
+
             # draw the cue
             pygame.draw.line(screen, BROWN, (cue_front_x, cue_front_y), (cue_back_x, cue_back_y), 5)
-            # draw the guideline
+            # we know one end of the guideline (the cue ball), now get the other end
+            cue_end_point_x = cue_back_x
+            cue_end_point_y = cue_back_y
             cue_end_point_x, cue_end_point_y = determine_guideline(cue_end_point_x, cue_end_point_y, cue_front_x, cue_front_y, mouse_degs)
-            #pygame.draw.line(screen, WHITE, (cue_ball.x, cue_ball.y), (cue_end_point_x, cue_end_point_y), 1)
+            # draw the guideline
+            pygame.draw.line(screen, WHITE, (cue_ball.x, cue_ball.y), (cue_end_point_x, cue_end_point_y), 1)
 
 
         ### Game end and player turns ###
@@ -743,8 +722,8 @@ while not done:
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
  
-    # --- Limit to 60 frames per second
-    clock.tick(60)
+    # --- Limit frames per second
+    clock.tick(240)
  
 # Close the window and quit.
 pygame.quit()
