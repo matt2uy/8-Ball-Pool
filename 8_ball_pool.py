@@ -673,8 +673,9 @@ while not done:
         if cue_ball.pocketed:
             print "pocketed"
             cue_ball_in_hand = True
-            # reset ball variable (should be a one time thing)
-            ball_in_hand()
+            # if the balls have stopped moving -> reset ball variable (should be a one time thing)
+            if balls_in_movement == False:   
+                ball_in_hand()
 
         # ball is able to be dragged around by the player currently in possession
         if cue_ball_in_hand:
