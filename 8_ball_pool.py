@@ -410,8 +410,8 @@ def ball_to_ball_collision(ball_direction, ball_speed, ball_x, ball_y):
                     # now it is confirmed that they are in contact
                     if ball_instance.in_contact == False: # make sure it doesn't do the below twice, for only one contact
                         ball_instance.direction = get_angle(ball_instance.x, ball_instance.y, ball_x, ball_y)
-                        ball_instance.speed = ball_speed*0.95#0.75
-                        ball_speed *= 0.90#0.75
+                        ball_instance.speed = ball_speed*0.97
+                        ball_speed *= 0.90
                             
                         ball_instance.in_contact = True
                 else: # passed one test but is ultimately not in contact
@@ -456,10 +456,10 @@ def manage_ball_status(ball_direction, ball_x, ball_y, ball_speed, ball_pocketed
     ball_x_increment, ball_y_increment = angle_to_coordinates(ball_direction, ball_x, ball_y)
 
 
-    ball_x += ball_x_increment*ball_speed/3
-    ball_y += ball_y_increment*ball_speed/3
+    ball_x += ball_x_increment*ball_speed/4
+    ball_y += ball_y_increment*ball_speed/4
     # gradually reduce the ball's speed due to gravity
-    ball_speed -= 0.023 #0.095
+    ball_speed -= 0.018 #0.095
 
     ## Check if it gets pocketed
     ball_pocketed = check_if_ball_pocketed(ball_x, ball_y)
