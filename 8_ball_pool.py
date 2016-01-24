@@ -1,11 +1,8 @@
 # Source code for this project can also be found in the github repository: https://github.com/matt2uy/8-Ball-Pool
-# Name: Matthew Uy
-# Date: January 22, 2016
+# Name: Matthew, Daniel and Elgin
+# Date: January 25, 2016
 # Assignment: CPT - "8 Ball Pool"
 # Description and Lab requirements: Located inside the final report
-
-# draw text: http://stackoverflow.com/questions/10077644/python-display-text-w-font-color
-# downloaded font .ttf file from here: http://www.fontsquirrel.com/fonts/PT-Sans
 
 import pygame, math
 
@@ -413,7 +410,6 @@ def get_distance(point1_x, point1_y, point2_x, point2_y):
     return distance
 
 def convert_polar_coordinates_to_cartesian(x, y, angle, length):
-    # use the cos and sin functions to convert: shown here - https://www.mathsisfun.com/polar-cartesian-coordinates.html
     x += length * math.cos(math.radians(angle))
     y += length * math.sin(math.radians(angle))
     return x, y
