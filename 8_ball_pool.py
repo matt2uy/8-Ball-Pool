@@ -10,10 +10,14 @@
 # Assignment: CPT - "8 Ball Pool"
 # Description and Lab requirements: Located inside the final report
 
+# draw text: http://stackoverflow.com/questions/10077644/python-display-text-w-font-color
+# downloaded font .ttf file from here: http://www.fontsquirrel.com/fonts/PT-Sans
+
 import pygame, math
 
 ### Colours ###
 BROWN = (130, 84, 65)   # cue
+GREY = (245, 245, 245)   # cue
 DARK_BROWN = (110, 74, 55)   # pool table border
 green_r = 51
 green_g =  163
@@ -28,6 +32,9 @@ white_b = 255
 WHITE = (white_r, white_g, white_b) # cue ball
 # ball pulsing variable
 ball_pulse_multiplier = -0.5
+# in game message variables (the int represent the amount of time left - in milliseconds)
+intro_message = 1200 # 240 fps, so 480 frames = 5 seconds
+ball_in_hand_message = 0
 
 ### Game variables ###
 game_in_progress = False
@@ -66,7 +73,7 @@ class Ball():
         self.speed = 0
         self.pocketed = False
         self.in_contact = False # temp?
-    
+
 # create an instance of each ball on the table
 cue_ball = Ball()
 cue_ball.colour = "White"
@@ -264,6 +271,8 @@ def draw_scoreboard():
     for ball in range(num_of_blue_left):
         pygame.draw.circle(screen, BLUE, (675+ball*20, 120), 7, 0)
 
+    draw_text("Current Player:", 433, 107, GREY, 20)
+
 def draw_balls():
     # draw the cue and eight balls
     if cue_ball.pocketed == False:
@@ -302,6 +311,23 @@ def draw_balls():
         pygame.draw.circle(screen, BLUE, (int(blue_ball_6.x), int(blue_ball_6.y)), 7, 0)
     if blue_ball_7.pocketed == False:
         pygame.draw.circle(screen, BLUE, (int(blue_ball_7.x), int(blue_ball_7.y)), 7, 0)
+
+def draw_text(text, x, y, colour, font_size):
+    font = pygame.font.Font("fonts/PTC55F.ttf", font_size) # the font file is found within this project's directory
+    label = font.render(text, 1, colour)
+    screen.blit(label, (x, y))  
+
+def draw_intro_message(time_left):
+    if time_left > 0:
+        draw_text("Click and drag the cue to begin", 360, 380, WHITE, 20)
+        time_left -= 1
+    return time_left
+
+def draw_ball_in_hand_message(time_left):
+    if time_left > 0:
+        draw_text("Click and drag the cue ball to move it", 340, 380, WHITE, 20)
+        time_left -= 1
+    return time_left
 
 def pulse_cue_ball(white_r, white_g, white_b, ball_pulse_multiplier, WHITE):
         # if the ball is in hand -> make it flash
@@ -563,9 +589,9 @@ def determine_player_turn(current_player_turn, current_shot_count, previous_shot
 
     # Draw an indicator, showing which player's turn it is
     if current_player_turn == "Red":
-        pygame.draw.rect(screen, RED, [513, 107, 25, 25], 0)
+        pygame.draw.rect(screen, RED, [593, 107, 25, 25], 0)
     elif current_player_turn == "Blue":
-        pygame.draw.rect(screen, BLUE, [513, 107, 25, 25], 0)
+        pygame.draw.rect(screen, BLUE, [593, 107, 25, 25], 0)
 
     return current_player_turn, current_shot_count, previous_shot_count, ball_pocketed_in_this_shot
 
@@ -597,6 +623,10 @@ while not done:
         draw_static_objects()
         draw_scoreboard()
         draw_balls()
+
+        # draw in-game messages
+        intro_message = draw_intro_message(intro_message)
+        ball_in_hand_message = draw_ball_in_hand_message(ball_in_hand_message)
         
         # Get the mouse press values
         mouse_left = get_mouse_press()
@@ -676,6 +706,7 @@ while not done:
             # if the balls have stopped moving -> reset ball variable (should be a one time thing)
             if balls_in_movement == False:   
                 ball_in_hand()
+                ball_in_hand_message += 1200 # show user how to drag the ball - for 5 seconds
 
         # ball is able to be dragged around by the player currently in possession
         if cue_ball_in_hand:
