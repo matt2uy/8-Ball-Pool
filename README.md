@@ -5,3 +5,6 @@ How To Play
 2. Open cmd or terminal
 
 3. Run `python 8_ball_pool.py`
+
+![Alt text](/Images/Gameplay.png?raw=true "Gameplay")
+![Alt text](/Images/menu_play.png?raw=true "Main Menu")
