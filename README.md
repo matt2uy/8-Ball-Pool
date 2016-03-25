@@ -6,5 +6,5 @@ How To Play
 
 3. Run `python 8_ball_pool.py`
 
-![Alt text](/Images/Gameplay.png?raw=true "Gameplay")
+![Alt text](/Images/Gameplay.png?raw=true "gameplay")
 ![Alt text](/Images/menu_play.png?raw=true "Main Menu")
